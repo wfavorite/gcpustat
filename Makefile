@@ -5,9 +5,9 @@ LD_OPTS=-Wall -Werror -std=c++0x
 CC_OPTS=-Wall -Werror -std=c++0x
 export LANG=C
 
-ccpu: ccstart main.o options.o optparse.o cnodes.o
+gcpu: ccstart main.o options.o optparse.o cnodes.o
 	@printf ".Done.\nLinking.."
-	@$(CPP) $(LD_OPTS) -o ccpu main.o optparse.o options.o cnodes.o
+	@$(CPP) $(LD_OPTS) -o gcpu main.o optparse.o options.o cnodes.o
 	@printf ".Done.\n"
 
 main.o: main.cpp options.hpp cnodes.hpp
@@ -31,7 +31,7 @@ ccstart:
 
 clean: lean
 	@printf "Cleaning code directory."
-	@rm -f ccpu
+	@rm -f gcpu
 	@printf ".Done.\n"
 
 lean:
