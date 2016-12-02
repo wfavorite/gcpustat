@@ -10,7 +10,10 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+   /* Parse command line options */
    Options o(argc, argv);
+
+   /* Parse out all the CPU nodes */
    Nodes n(o);
 
    /* Required to continue (for most options) */

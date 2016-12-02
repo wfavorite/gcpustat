@@ -3,6 +3,7 @@
    0.1.0   12/1/16 - Original creation.
    0.2.0   12/2/16 - Forward movement on features and cleanup.
                    - Added comments and todos.
+                   - Fixed bug with bad move in OptParse::IsExclusive()
 
 */
 #define VERSION_STRING "0.2.0"
@@ -12,8 +13,6 @@
    [ ] Utilize interval and iterations values.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
    [ ] Validate socket parsing on a multi-socket system.
-   [ ] Overflow issue on first iteration on long-running system. (Changed core
-       data type to unsigned long long. This is a typedef in cnodes.hpp.)
    [ ] Insure that we cannot be IS_POS_ARG and HAS_xD_ARG at the same time.
    [_] Add support for ALLOW_MULT.
    [ ] OptParse::IsExclusive() allows for list members that do not exist.
@@ -23,4 +22,6 @@
 
   Done:
    [X] The -d option should be stackable. (Resolved by using -D and -d.)
+   [X] Overflow issue on first iteration on long-running system. (Changed core
+       data type to unsigned long long. This is a typedef in cnodes.hpp.)
 */

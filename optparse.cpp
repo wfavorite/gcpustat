@@ -506,12 +506,12 @@ bool OptParse::WasFound(string olabel)
 */
 int OptParse::GetValue(string olabel, string & val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
    /* Check to see if one of the parsed feature flags were set. */
-   if ( oi.parsedf & READ_A_STR )
+   if ( oi->parsedf & READ_A_STR )
    {
-      val = oi.str_value;
+      val = oi->str_value;
       return(0);
    }
 
@@ -521,12 +521,12 @@ int OptParse::GetValue(string olabel, string & val)
 
 int OptParse::GetValue(string olabel, int & val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
    /* Check to see if one of the parsed feature flags were set. */
-   if ( oi.parsedf & READ_A_INT )
+   if ( oi->parsedf & READ_A_INT )
    {
-      val = oi.int_value;
+      val = oi->int_value;
       return(0);
    }
 
@@ -536,12 +536,12 @@ int OptParse::GetValue(string olabel, int & val)
 
 int OptParse::GetValue(string olabel, long &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
    /* Check to see if one of the parsed feature flags were set. */
-   if ( oi.parsedf & READ_A_LNG )
+   if ( oi->parsedf & READ_A_LNG )
    {
-      val = oi.lng_value;
+      val = oi->lng_value;
       return(0);
    }
 
@@ -551,12 +551,12 @@ int OptParse::GetValue(string olabel, long &val)
 
 int OptParse::GetValue(string olabel, unsigned long &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
    
    /* Check to see if one of the parsed feature flags were set. */
-   if ( oi.parsedf & READ_AULNG )
+   if ( oi->parsedf & READ_AULNG )
    {
-      val = oi.ulng_value;
+      val = oi->ulng_value;
       return(0);
    }
 
@@ -566,72 +566,18 @@ int OptParse::GetValue(string olabel, unsigned long &val)
 
 int OptParse::GetValue(string olabel, char &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
    
    /* Check to see if one of the parsed feature flags were set. */
-   if ( oi.parsedf & READ_ACHAR )
+   if ( oi->parsedf & READ_ACHAR )
    {
-      val = oi.char_value;
+      val = oi->char_value;
       return(0);
    }
 
    /* Fall-thru to error */
    return(1);
 }
-
-#ifdef UNDEFINED
-template <typename GVT> int OptParse::GetValue(string olabel, GVT &val)
-{
-   map<string, OptItem>::iterator itr = optlist.find(olabel);
-
-   if ( itr == optlist.end() )
-   {
-      /* This means that the *label* was not found. */
-      
-      assert(1); /* assert() that the developer used a misspelled label */
-      return(0);
-   }
-
-   /* This is a half-thought design...
-      1. It does not really solve the problem and just uses templates in
-         a crafty-poor manner.
-      2. I could have just wrapped the find() part in another function
-         that would have had the same optimizing effect.
-   */
-   if ( std::is_same<GVT, long>::val )
-   {
-      /* Check to see if one of the parsed feature flags were set. */
-      if ( itr->second.parsedf & READ_A_LNG )
-      {
-         val = itr->second.lng_value;
-         return(0);
-      }
-   }
-
-   if ( is_same<GVT, int>::val )
-   {
-      /* Check to see if one of the parsed feature flags were set. */
-      if ( itr->second.parsedf & READ_A_INT )
-      {
-         val = itr->second.int_value;
-         return(0);
-      }
-   }
-
-   if ( is_same<GVT, string>::val )
-   {
-      /* Check to see if one of the parsed feature flags were set. */
-      if ( itr->second.parsedf & READ_A_STR )
-      {
-         val = itr->second.str_value;
-         return(0);
-      }
-   }
-
-   /* Fall-thru to error */
-   return(1);
-}
-#endif   
 
 /* ========================================================================= */
 int OptParse::DumpErrors(void)
@@ -658,6 +604,7 @@ int OptParse::DumpErrors(void)
 
 /* ========================================================================= */
 /* This always returns a proper value (or it assert()s).                     */
+#ifdef STUB_BAD_MOVE
 OptItem OptParse::find_opt_item(string olabel)
 {
    map<string, OptItem>::iterator itr = optlist.find(olabel);
@@ -665,106 +612,149 @@ OptItem OptParse::find_opt_item(string olabel)
    if ( itr == optlist.end() )
    {
       /* This means that the *label* was not found. */
-      assert(1); /* assert() that the developer used a misspelled label */
+      cerr << "ASSERT: BAD LABEL = \"" << olabel << "\"" << endl;
+      assert(0); /* assert() that the developer used a misspelled label */
+      exit(1);
    }
 
    return(itr->second);
+}
+#endif
+
+OptItem *OptParse::find_opt_item(string olabel)
+{
+   //OptItem *oir = NULL;
+   map<string, OptItem>::iterator itr = optlist.find(olabel);
+
+   if ( itr == optlist.end() )
+   {
+      /* This means that the *label* was not found. */
+      cerr << "ASSERT: BAD LABEL = \"" << olabel << "\"" << endl;
+      assert(0); /* assert() that the developer used a misspelled label */
+      exit(1);
+   }
+
+   return(&itr->second);
 }
 
 /* ========================================================================= */
 int OptParse::GetState(string olabel, string &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
-   if ( oi.found == 0 )
+   if ( oi->found == 0 )
       return(0);
    
-   if ( 0 == (oi.parsedf & READ_A_STR) )
+   if ( 0 == (oi->parsedf & READ_A_STR) )
       return(-1);
    
-   val = oi.str_value;
+   val = oi->str_value;
 
-   return(oi.found);
+   return(oi->found);
 }
 
 int OptParse::GetState(string olabel, int &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
-   if ( oi.found == 0 )
+   if ( oi->found == 0 )
       return(0);
    
-   if ( 0 == (oi.parsedf & READ_A_INT) )
+   if ( 0 == (oi->parsedf & READ_A_INT) )
       return(-1);
    
-   val = oi.int_value;
+   val = oi->int_value;
 
-   return(oi.found);
+   return(oi->found);
 }
 
 int OptParse::GetState(string olabel, long &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
-   if ( oi.found == 0 )
+   if ( oi->found == 0 )
       return(0);
    
-   if ( 0 == (oi.parsedf & READ_A_LNG) )
+   if ( 0 == (oi->parsedf & READ_A_LNG) )
       return(-1);
    
-   val = oi.lng_value;
+   val = oi->lng_value;
 
-   return(oi.found);
+   return(oi->found);
 }
 
 int OptParse::GetState(string olabel, unsigned long &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
-   if ( oi.found == 0 )
+   if ( oi->found == 0 )
       return(0);
    
-   if ( 0 == (oi.parsedf & READ_AULNG) )
+   if ( 0 == (oi->parsedf & READ_AULNG) )
       return(-1);
    
-   val = oi.ulng_value;
+   val = oi->ulng_value;
 
-   return(oi.found);
+   return(oi->found);
 }
 
 int OptParse::GetState(string olabel, char &val)
 {
-   OptItem oi = find_opt_item(olabel);
+   OptItem *oi = find_opt_item(olabel);
 
-   if ( oi.found == 0 )
+   if ( oi->found == 0 )
       return(0);
    
-   if ( 0 == (oi.parsedf & READ_ACHAR) )
+   if ( 0 == (oi->parsedf & READ_ACHAR) )
       return(-1);
    
-   val = oi.char_value;
+   val = oi->char_value;
 
-   return(oi.found);
+   return(oi->found);
 }
 
-
+/* ========================================================================= */
 bool OptParse::IsExclusive(string olabel, vector<string> ev)
 {
-   OptItem oi = find_opt_item(olabel);
-
-   if ( 0 == oi.found )
-      return(true);
+   OptItem *voi;
+   /* The point of allow_false is to make the function walk the list NO MATTER
+      WHAT. This is a means to force out errors in calling that testing might
+      not find (unless a specific option was specified). This is designed to
+      uncover misuse of the library/function faster and easier. */
+   bool allow_false = true;
    
+   /* Look for the item we are comparing to. Note that find_opt_item() will
+      assert if the item was not in the optlist. */
+   OptItem *oi = find_opt_item(olabel);
+
+   /* Exit with no exclusivity conflict if the "comparitor" is not set. */
+   if ( 0 == oi->found )
+      allow_false = false;
+
+   /* At this point - we know that olabel (the comparitor) exists, and is
+      set by the user on the command line. */
    for ( auto vi : ev )
    {
-      /* Insure that the olabel is not in the vector. */
+      /* Insure that the olabel is not in the vector. This means that we
+         are checking to insure that the caller did not put the "comparitor"
+         into the vector they are comparing against. */
       assert( olabel != vi );
 
-      OptItem voi = find_opt_item(vi);
+      voi = find_opt_item(vi);
 
-      if ( voi.found )
-         return(false);
+      /* Only flag an error (return false) if olabel was not set. */
+      if ( allow_false )
+      {
+         if ( voi->found )
+            return(false);
+      }
    }
 
+   /* We could be here for two reasons:
+      1. The item behind olabel was not flagged on the command line (and
+         allow_false was set to false).
+      2. The item behind olabel WAS flagged, and none of the other options
+         in the supplied vector were set.
+   */
    return(true);
 }

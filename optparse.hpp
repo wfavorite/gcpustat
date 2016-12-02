@@ -97,7 +97,8 @@ struct OptItem
    int position;
 
    unsigned long parsedf;   /* Features that have been parsed                */
-   int found;
+   int found;               /* Simple flag/counter when the item is used on
+                               the command line.                             */
    
    /* Each of the types */
    string         str_value;
@@ -282,7 +283,8 @@ public:
    string arg_zero;
    
 private:
-   OptItem find_opt_item(string olabel); /* Works or asserts                 */
+   //OptItem find_opt_item(string olabel); /* Works or asserts                 */
+   OptItem *find_opt_item(string olabel); /* Works or asserts                 */
 
    bool optitem_exists(string olabel); /* Used to find if an OptItem
                                           exists or not.                     */

@@ -42,10 +42,8 @@ Options::Options(int argc, char *argv[])
    op.RegisterOption("display full", 'f');
    op.RegisterOption("display full", "display-full");
 
-   
-
    op.RegisterOption("debug", '+');
-   
+
    op.Resolve(argc, argv);
 
    if ( op.DumpErrors() )
@@ -61,18 +59,12 @@ Options::Options(int argc, char *argv[])
       /* Iterations */
       cerr << "Interval      : ";
       unsigned long dinterval;
-      if ( op.GetState("filename", dinterval) )
+      if ( op.GetState("interval", dinterval) )
          cerr << dinterval;
       else
          cerr << "Unset";
       cerr << endl;
 
-
-
-
-
-
-      
       /* Help */
       if ( op.WasFound("help") )
          cerr << "Help          : ";
@@ -88,21 +80,30 @@ Options::Options(int argc, char *argv[])
          cerr << "About         : un";
       cerr << "set" << endl;
 
-      /* Dump */
-      if ( op.WasFound("data dump") )
-         cerr << "Dump layout   : ";
+      /* Dump types */
+      if ( op.WasFound("simple dump") )
+         cerr << "Simple dump   : ";
       else
-         cerr << "Dump layout: un";
+         cerr << "Simple dump   : un";
       cerr << "set" << endl;
+
+      if ( op.WasFound("detailed dump") )
+         cerr << "Detailed dump : ";
+      else
+         cerr << "Detailed dump : un";
+      cerr << "set" << endl;
+
+
+      
    } /* End of debuggery output */
 
-   if ( ! op.IsExclusive("about", {"dump layout", "interval", "iterations"}) )
+   if ( ! op.IsExclusive("about", {"simple dump", "detailed dump", "interval", "iterations"}) )
    {
       cerr << "ERROR: The -a option is mutually exclusive of all other options." << endl;
       exit(1);
    }
 
-   if ( ! op.IsExclusive("help", {"dump layout", "interval", "iterations"}) )
+   if ( ! op.IsExclusive("help", {"simple dump", "detailed dump", "interval", "iterations"}) )
    {
       cerr << "ERROR: The -h option is mutually exclusive of all other options." << endl;
       exit(1);
