@@ -13,20 +13,23 @@ int main(int argc, char *argv[])
    Options o(argc, argv);
    Nodes n(o);
 
-   /* STUB: Change this feature (dump !boolean) */
-   if ( o.dump )
-   {
-      n.PrintLayout();
-      return(0);
-   }
-
-   /* STUB: Required to continue */
+   /* Required to continue (for most options) */
    n.BuildCPUList();
 
-   /* STUB: Conditional */
-   n.PrintLLayout();
+   /* Handle our dump options. */
+   switch ( o.dump )
+   {
+   case DUMP_DETAILED:
+      n.PrintLayout();
+      return(0);
+   case DUMP_SIMPLE:
+      n.PrintLLayout();
+      return(0);
+   default:
+      break;
+   }
 
-   cerr << "===========================" << endl;
+   /* cerr << "===========================" << endl; */
 
    while ( 1 ) /* STUB: o.iterations goes here - countdown conditional */
    {

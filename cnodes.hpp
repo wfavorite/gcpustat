@@ -10,7 +10,9 @@
 
 using namespace std;
 
-typedef unsigned long rstat_t;
+/* This is the datatype used to hold stats */
+typedef unsigned long long rstat_t;
+
 /* ========================================================================= */
 class LCore
 {

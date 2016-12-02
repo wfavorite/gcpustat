@@ -106,7 +106,9 @@ Nodes::Nodes(Options &o)
          {
             /* End of a logical processor section. Add the logical */
             
-            cerr << "DEBUG:" << physical_id << ":" << core_id << ":" << processor << endl;
+            /* DEBUGGERY
+               cerr << "DEBUG:" << physical_id << ":" << core_id << ":" << processor << endl;
+            */
 
             if ( physical_id > max_physical_id )
                max_physical_id = physical_id;
@@ -220,6 +222,10 @@ void Nodes::PrintLayout(int level)
    PCore *c;
    LCore *p;
 
+   cout << "Core width (threads per core): " << width << endl;
+   cout << "Socket height (threads per socket): " << socket_height << endl;
+   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
+   cout << endl;
    
    physical_id = 0;
    while ( physical_id <= max_physical_id )
@@ -331,6 +337,7 @@ int Nodes::PrintLLayout(void)
    cout << "Core width (threads per core): " << width << endl;
    cout << "Socket height (threads per socket): " << socket_height << endl;
    cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
+   cout << endl;
    
    for ( vector< LCore * >::iterator li = llist.begin();
          li != llist.end();
