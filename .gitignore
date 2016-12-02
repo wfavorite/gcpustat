@@ -2,3 +2,6 @@ core
 gcpu
 *~
 *.o
+
+# A sample of the interrupts file (that may or may-not exist)
+interrupts

@@ -14,7 +14,9 @@ Options::Options(int argc, char *argv[])
    iterations = 0;
    dump = false;
    debug = false;
-   
+   denote_sockets = false;
+   column_display = COL_DISP_BASE;
+
    OptParse op;
 
    op.RegisterOption("interval", 1, READ_AULNG);
@@ -27,6 +29,17 @@ Options::Options(int argc, char *argv[])
    op.RegisterOption("help", "help");
    op.RegisterOption("about", 'a');
    op.RegisterOption("about", "about");
+
+   op.RegisterOption("denote sockets", 's');
+   op.RegisterOption("denote sockets", "denote-sockets");
+
+   op.RegisterOption("display most", 'm');
+   op.RegisterOption("display most", "display-most");
+
+   op.RegisterOption("display full", 'f');
+   op.RegisterOption("display full", "display-full");
+
+   
 
    op.RegisterOption("debug", '+');
    
@@ -124,7 +137,24 @@ Options::Options(int argc, char *argv[])
      */
   }
 
+  if ( op.WasFound("denote sockets") )
+     denote_sockets = true;
 
+  if ( ! op.IsExclusive("display most", {"display full"}) )
+   {
+      cerr << "ERROR: The -m(ost) and -f(ull) options are mutually exclusive." << endl;
+      exit(1);
+   }
+   
+  if ( op.WasFound("display most") )
+     column_display = COL_DISP_MOST;
+
+  if ( op.WasFound("display full") )
+     column_display = COL_DISP_FULL;
+
+
+   
+   
 
   /* Now process the regular params */
 #ifdef STUB_REMOVE

@@ -6,6 +6,8 @@
 #include <map>
 #include <array>
 
+#include "options.hpp"
+
 using namespace std;
 
 typedef unsigned long rstat_t;
@@ -105,7 +107,7 @@ const int PRINT_LEVEL_FULL = 3;
 class Nodes
 {
 public:
-   Nodes();
+   Nodes(Options &o);
    void PrintLayout(int level = PRINT_LEVEL_FULL);
    int BuildCPUList(void);
    int PrintLLayout(void);
@@ -128,6 +130,9 @@ public:
                                   be more performant than a vector. But C++. */
    vector<LCore *> llist;      /* Logically ordered list (for printing).     */
    vector<LCore *> olist;      /* "Ordered" list for gathering stats.        */
+
+   int column_display;
+   int denote_sockets;
 };
 
 

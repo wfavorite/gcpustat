@@ -6,7 +6,7 @@
 
 #include "cnodes.hpp"
 
-Nodes::Nodes()
+Nodes::Nodes(Options &o)
 {
    string line;
    string fvalue; /* Found value */
@@ -24,6 +24,8 @@ Nodes::Nodes()
    /* Initialize some values. (This is the constructor after all.) */
    max_physical_id = -1;
    cpu_count = 0;
+   column_display = o.column_display;
+   denote_sockets = o.denote_sockets;
 
 
    
@@ -619,7 +621,8 @@ int LCore::InsertNewRead(rstat_t user,
 /* ========================================================================= */
 int Nodes::ScatterCPUStat(void)
 {
-   unsigned int l = 1;
+   unsigned int l = 1;  /* The logical core count */
+   unsigned int s = 0;  /* The socket count */
    LCore *lc;
 
    float user;
@@ -644,9 +647,12 @@ int Nodes::ScatterCPUStat(void)
    
    for ( unsigned int i = 0; i < width; i++ )
    {
-      cout << "     User Nice  Sys Idle";
-      cout << " IOwt  Irq SIrq";
-      cout << "  Stl  Gst  GNi   ";
+      cout << "      User Nice  Sys Idle";
+      if ( column_display >= COL_DISP_MOST )
+         cout << " IOwt  Irq SIrq";
+      if ( column_display == COL_DISP_FULL )
+         cout << "  Stl  Gst  GNi";
+      cout << "   ";
 
    }
    cout << endl;
@@ -669,36 +675,58 @@ int Nodes::ScatterCPUStat(void)
                       guest,
                       guest_nice);
 
+      switch ( column_display )
+      {  /* YES... I intentionally fall thru here. */
+      case COL_DISP_MOST:
+         idle += steal;       /* It is not used (by us) so considered idle. */
+         user += guest;       /* Spent by virtuals, so effectively user.    */
+         nice += guest_nice;  /* Like guest, but nice so roll it into nice. */
+      case COL_DISP_BASE:
+         system += (iowait + irq + softirq); /* All of these are system     */
+      default:                               /* items (assuming softirq is  */
+         break;                              /* only the signal and not     */
+      }                                      /* signal processing           */
+
+      if (( denote_sockets ) && ( 1 == l % socket_height ))
+         cout << "sock" << s << endl;
+
+
       color = CYAN;
-      if ( idle <= 98 )
+      if ( idle < 99 )
          color = GREEN;
-      if ( idle <= 30 )
+      if ( idle < 30 )
          color = YELLOW;
-      if ( idle <= 15 )
+      if ( idle < 15 )
          color = RED;
       if ( idle <= 1 )
          color = MAGENTA;
       
       printf("%c[%dm", 27, color);
-      fflush(stdout);
+      fflush(stdout); /* I flush because I don't know if printf and cout use 
+                         the same buffer. */
       
       cout << fixed;
       cout << setprecision(0);
-      cout << "cpu" << lc->processor << " " << setw(3) << user << "% " << setw(3) << nice << "% " << setw(3) << system << "% " << setw(3) << idle << "%";
-      cout << " " << setw(3) << iowait << "% " << setw(3) << irq << "% " << setw(3) << softirq << "%";
-      cout << " " << setw(3) << steal << "% " << setw(3) << guest << "% " << setw(3) << guest_nice << "%";
+
+      cout << "cpu" << lc->processor << "  " << setw(3) << user << "% " << setw(3) << nice << "% " << setw(3) << system << "% " << setw(3) << idle << "%";
+      if ( column_display >= COL_DISP_MOST )
+         cout << " " << setw(3) << iowait << "% " << setw(3) << irq << "% " << setw(3) << softirq << "%";
+      if ( column_display == COL_DISP_FULL )
+         cout << " " << setw(3) << steal << "% " << setw(3) << guest << "% " << setw(3) << guest_nice << "%";
+
       cout.unsetf(ios::fixed);
-      cout << flush;
+      cout << flush; /* See note above on fflush() */
       
       printf("%c[%dm", 27, NORMAL);
-      fflush(stdout);
+      fflush(stdout); /* Again. The same reason for gratitious flushing. */
       
       if ( 0 == l % width )
          cout << endl;
       else
          cout << "   ";
 
-      if (( 0 == l % socket_height ) && ( l != cpu_count ))
+      /* STUB: This is likely an extra space if denoting sockets. */
+      if (( denote_sockets ) && ( 0 == l % socket_height ) && ( l != cpu_count ))
       {
          cout << endl;
       }

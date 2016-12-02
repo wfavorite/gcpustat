@@ -5,6 +5,10 @@
 
 #include "optparse.hpp"
 
+/* Option values for what columns to display */
+const int COL_DISP_BASE = 1;
+const int COL_DISP_MOST = 2;
+const int COL_DISP_FULL = 3;
 
 struct Options
 {
@@ -12,6 +16,17 @@ struct Options
    unsigned long iterations;
    bool dump;
    bool debug;
+
+   bool denote_sockets;       /* Denote socket boundaries in output.         */
+   int column_display;
+   
+   /* Potential options:
+      -l logical ordering
+      -n numerical ordering
+      -i show interrupts
+      -4 Just user,nice,system,idle
+      -s Denote socket boundaries
+   */
 
    Options(int argc, char *argv[]);
 
