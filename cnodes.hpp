@@ -10,7 +10,7 @@
 
 using namespace std;
 
-/* This is the datatype used to hold stats */
+/* This is the datatype used to hold r(aw) stats */
 typedef unsigned long long rstat_t;
 
 /* ========================================================================= */
@@ -136,6 +136,5 @@ public:
    int column_display;
    int denote_sockets;
 };
-
 
 #endif

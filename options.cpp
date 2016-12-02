@@ -171,7 +171,16 @@ void Options::help(void)
    cout << "   Options:" << endl;
    cout << "     -a/--about     Show about information (and exit)" << endl;
    cout << "     -h/--help      Show (this) help (and exit)" << endl;
-   cout << "     -d             Dump cpu info (and exit)" << endl;
+   cout << "     -d             Dump detailed cpu info (and exit)" << endl;
+   cout << "     -D             Dump \"simplified\" cpu layout (and exit)" << endl;
+   cout << "     -s             Denote socket boundaries in stats output." << endl;
+   cout << "     -m             Display \"most\" stats." << endl;
+   /* STUB: Describe here what "most" means. */
+   cout << "     -f             Display \"full\" stats." << endl;
+   /* STUB: Describe "full" */
+   /* STUB: Not yet implemented
+   cout << "     -i             Display per-CPU interrupt statistics." << endl;
+   */
    cout << flush;
 }
 
