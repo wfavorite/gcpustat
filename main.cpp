@@ -10,6 +10,9 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+   long itcnt; /* The iteration count */
+   long iterations;
+   
    /* Parse command line options */
    Options o(argc, argv);
 
@@ -32,17 +35,26 @@ int main(int argc, char *argv[])
       break;
    }
 
-   /* cerr << "===========================" << endl; */
-
-   while ( 1 ) /* STUB: o.iterations goes here - countdown conditional */
+   /* The "normal" usage scenario. */
+   itcnt = 0;
+   iterations = o.iterations; /* Move local ( and to signed val) */
+   if ( 0 == iterations )
+      itcnt = -1;
+   
+   while ( itcnt < iterations )
    {
-      n.GatherCPUStat(); /* STUB: Pass flags for interrupt collection */
+      n.GatherCPUStat();
 
-      n.ScatterCPUStat(); /* STUB: Pass flags for output options */
+      n.ScatterCPUStat();
 
       cout << endl; /* STUB: Move to Scatter */
-      
-      sleep(2); /* STUB: Pass interval value */
+
+      /* Only increment this if iterations is > 0 (see code above) */
+      if ( itcnt >= 0 )
+         itcnt++;
+
+      /* STUB: We sleep *after* the last iteration. This *should* be fixed. */
+      sleep(o.interval);
    }
 
    return(0);

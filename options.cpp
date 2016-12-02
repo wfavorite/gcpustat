@@ -56,11 +56,19 @@ Options::Options(int argc, char *argv[])
       /* ARG[0] */
       cerr << "ArgZero       : " << op.arg_zero << endl;
 
-      /* Iterations */
+      /* Iterations & interval */
       cerr << "Interval      : ";
       unsigned long dinterval;
       if ( op.GetState("interval", dinterval) )
          cerr << dinterval;
+      else
+         cerr << "Unset";
+      cerr << endl;
+
+      cerr << "Iterations    : ";
+      unsigned long diterations;
+      if ( op.GetState("iterations", diterations) )
+         cerr << diterations;
       else
          cerr << "Unset";
       cerr << endl;
@@ -93,7 +101,23 @@ Options::Options(int argc, char *argv[])
          cerr << "Detailed dump : un";
       cerr << "set" << endl;
 
+      if ( op.WasFound("denote sockets") )
+         cerr << "Denote sockets: ";
+      else
+         cerr << "Denote sockets: un";
+      cerr << "set" << endl;
 
+      if ( op.WasFound("display most") )
+         cerr << "Display most  : ";
+      else
+         cerr << "Display most  : un";
+      cerr << "set" << endl;
+
+      if ( op.WasFound("display full") )
+         cerr << "Display full  : ";
+      else
+         cerr << "Display full  : un";
+      cerr << "set" << endl;
       
    } /* End of debuggery output */
 
@@ -158,10 +182,8 @@ Options::Options(int argc, char *argv[])
      column_display = COL_DISP_FULL;
 
 
-   
-   
-
-
+  op.GetState("interval", interval);
+  op.GetState("iterations", iterations);
   
 };
 
