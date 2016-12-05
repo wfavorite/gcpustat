@@ -7,11 +7,15 @@
 #include <array>
 
 #include "options.hpp"
+#include "lcores.hpp"
 
 using namespace std;
 
+#ifdef STUB_RELOCATED
+
 /* This is the datatype used to hold r(aw) stats */
 typedef unsigned long long rstat_t;
+
 
 /* ========================================================================= */
 class LCore
@@ -68,6 +72,8 @@ public:
 
    rstat_t total;
 };
+
+#endif
 
 /* ========================================================================= */
 class PCore

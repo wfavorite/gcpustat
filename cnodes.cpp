@@ -207,11 +207,13 @@ PCore::PCore(int cid)
    lcores.clear();
 }
 
+#ifdef STUB_RELOCATED
 LCore::LCore(int lid, string &mhz)
 {
    processor = lid;
    cpu_mhz = mhz;
 }
+#endif
 
 /* ========================================================================= */
 void Nodes::PrintLayout(int level)
@@ -260,10 +262,13 @@ void Nodes::PrintLayout(int level)
             if ( level == PRINT_LEVEL_FULL )
             {
                cout << "  ";
-               cout << p->cpu_mhz;
-            }
+               cout << p->cpu_mhz << endl;
 
-            cout << endl;
+               /* STUB: This may be conditional */
+               p->DumpCacheLevels();
+            }
+            else
+               cout << endl;
          }
 
          core_id++;
@@ -574,6 +579,7 @@ int Nodes::GatherCPUStat(void)
    return(0);
 }
 
+#ifdef STUB_REMOVED
 int LCore::InsertNewRead(rstat_t user,
                          rstat_t nice,
                          rstat_t system,
@@ -623,7 +629,7 @@ int LCore::InsertNewRead(rstat_t user,
 
    return(0);
 }
-
+#endif
 
 /* ========================================================================= */
 int Nodes::ScatterCPUStat(void)
@@ -756,6 +762,7 @@ int Nodes::ScatterCPUStat(void)
    return(0);
 }
 
+#ifdef STUB_RELOCATED
 int LCore::GetLastRead(float &user,
                        float &nice,
                        float &system,
@@ -784,7 +791,6 @@ int LCore::GetLastRead(float &user,
    temp_f = this_idle - last_idle;
    idle = (temp_f / ftotal) * 100;
 
-
-
    return(0);
 }
+#endif

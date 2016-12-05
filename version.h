@@ -5,8 +5,9 @@
                    - Added comments and todos.
                    - Fixed bug with bad move in OptParse::IsExclusive()
                    - Cleanup work on parsing options.
+   0.3.0   12/5/16 - 
 */
-#define VERSION_STRING "0.2.0"
+#define VERSION_STRING "0.3.0"
 /*
   ToDo:
    [ ] Add the -i option and supporting code.
