@@ -9,6 +9,8 @@
 const int COL_DISP_BASE = 1;
 const int COL_DISP_MOST = 2;
 const int COL_DISP_FULL = 3;
+const int COL_DISP_MASK = 3;
+const int COL_FLG_SPEED = 4;  /* This is independent of the others           */
 
 /* Option values for the dump (layout) options. (Used in main.cpp.)          */
 const int DUMP_OFF      = 0;
@@ -24,6 +26,8 @@ struct Options
    bool denote_sockets;       /* Denote socket boundaries in output.         */
    int column_display;        /* Uses COL_DISP_* to determine what columns to
                                  display in the stats output.                */
+   bool show_cur_speed;       /* Simple flag option for showing current 
+                                 speed in the iterative output.              */
    bool debug;
    
    /* Potential options:

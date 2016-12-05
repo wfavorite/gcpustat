@@ -19,7 +19,6 @@ Nodes::Nodes(Options &o)
 
    CSocket *s;
    PCore *p;
-   //LCore *l;
 
    /* Initialize some values. (This is the constructor after all.) */
    max_physical_id = -1;
@@ -207,14 +206,6 @@ PCore::PCore(int cid)
    lcores.clear();
 }
 
-#ifdef STUB_RELOCATED
-LCore::LCore(int lid, string &mhz)
-{
-   processor = lid;
-   cpu_mhz = mhz;
-}
-#endif
-
 /* ========================================================================= */
 void Nodes::PrintLayout(int level)
 {
@@ -383,9 +374,7 @@ int Nodes::PrintLLayout(void)
 int Nodes::GatherCPUStat(void)
 {
    string line;
-   ifstream procstat("/proc/stat");
 
-   /* STUB: Need to find and store strlen (rather than looking for NULLs */
    int len;
    int i;
    int cpunum;
@@ -403,6 +392,7 @@ int Nodes::GatherCPUStat(void)
                      of the string, and to check if a new item has been
                      added. */
    
+   ifstream procstat("/proc/stat");
    if ( procstat.is_open() )
    {
       while(getline(procstat, line))
@@ -572,64 +562,54 @@ int Nodes::GatherCPUStat(void)
 
       } /* while (getline()) */
 
+      procstat.close();
    } /* if ( procstat.is_open() ) */
    
-   procstat.close();
-
-   return(0);
-}
-
-#ifdef STUB_REMOVED
-int LCore::InsertNewRead(rstat_t user,
-                         rstat_t nice,
-                         rstat_t system,
-                         rstat_t idle,
-                         rstat_t iowait,
-                         rstat_t irq,
-                         rstat_t softirq,
-                         rstat_t steal,
-                         rstat_t guest,
-                         rstat_t guest_nice)
-{
    
-   last_user = this_user;
-   last_nice = this_nice;
-   last_system = this_system;
-   last_idle = this_idle;
-   last_iowait = this_iowait;
-   last_irq = this_irq;
-   last_softirq = this_softirq;
-   last_steal = this_steal;
-   last_guest = this_guest;
-   last_guest_nice = this_guest_nice;
-
-   this_user = user;
-   this_nice = nice;
-   this_system = system;
-   this_idle = idle;
-   this_iowait = iowait;
-   this_irq = irq;
-   this_softirq = softirq;
-   this_steal = steal;
-   this_guest = guest;
-   this_guest_nice = guest_nice;
-
-   total = (this_user - last_user) +
-      (this_nice - last_nice) +
-      (this_system - last_system) +
-      (this_idle - last_idle) +
-      (this_iowait - last_iowait) +
-      (this_irq - last_irq) +
-      (this_softirq - last_softirq) +
-      (this_steal - last_steal) +
-      (this_guest - last_guest) +
-      (this_guest_nice - last_guest_nice);
 
 
+   ifstream cpuinfo("/proc/cpuinfo");
+   int processor;
+   
+   if ( cpuinfo.is_open() )
+   {
+      while(getline(cpuinfo, line))
+      {
+         if ( 0 == line.find("processor") )
+         {
+            i = line.find(':');
+
+            i++; /* Move off the ':' char */
+            
+            while ( line[i] == ' ' )
+               i++;
+
+            processor = stoi(line.substr(i));
+         }
+
+         if ( 0 == line.find("cpu MHz") )
+         {
+            i = line.find(':');
+
+            i++; /* Move off the ':' char */
+            
+            while ( line[i] == ' ' )
+               i++;
+
+            /* cpu_mhz = line.substr(i); */
+            olist[processor]->cpu_mhz = line.substr(i);
+            /*
+                 cerr << "proc" << processor << " @ " << line.substr(i) << " MHz" << endl;
+            */
+         }
+
+
+
+      }
+   }
 
    return(0);
 }
-#endif
 
 /* ========================================================================= */
 int Nodes::ScatterCPUStat(void)
@@ -649,24 +629,30 @@ int Nodes::ScatterCPUStat(void)
    float guest;
    float guest_nice;
 
-   const int RED = 31;
+   /* These numbers have 3x area equivelants that are not as nice
+      looking. I stick to the brighter 9x values, and stay away
+      from the extended codes that may not have the same support. */
+   const int RED = 91;
    const int NORMAL = 0;
-   const int GREEN = 32;
-   const int CYAN = 36;
-   const int MAGENTA = 35;
-   const int YELLOW = 33;
+   const int GREEN = 92;
+   const int CYAN = 96;  /* 36 */
+   const int MAGENTA = 95;
+   const int YELLOW = 93; /* 33 */
    
    int color;
    
    for ( unsigned int i = 0; i < width; i++ )
    {
       cout << "      User Nice  Sys Idle";
-      if ( column_display >= COL_DISP_MOST )
+      if ( ( column_display & COL_DISP_MASK ) >= COL_DISP_MOST )
          cout << " IOwt  Irq SIrq";
-      if ( column_display == COL_DISP_FULL )
+      if ( ( column_display & COL_DISP_MASK ) == COL_DISP_FULL )
          cout << "  Stl  Gst  GNi";
       cout << "   ";
 
+      if ( column_display & COL_FLG_SPEED )
+         cout << "MHz   ";
+      
    }
    cout << endl;
 
@@ -688,7 +674,7 @@ int Nodes::ScatterCPUStat(void)
                       guest,
                       guest_nice);
 
-      switch ( column_display )
+      switch ( column_display & COL_DISP_MASK )
       {  /* YES... I intentionally fall thru here. */
       case COL_DISP_MOST:
          idle += steal;       /* It is not used (by us) so considered idle. */
@@ -722,11 +708,14 @@ int Nodes::ScatterCPUStat(void)
       cout << setprecision(0);
 
       cout << "cpu" << lc->processor << "  " << setw(3) << user << "% " << setw(3) << nice << "% " << setw(3) << system << "% " << setw(3) << idle << "%";
-      if ( column_display >= COL_DISP_MOST )
+      if ( ( column_display & COL_DISP_MASK ) >= COL_DISP_MOST )
          cout << " " << setw(3) << iowait << "% " << setw(3) << irq << "% " << setw(3) << softirq << "%";
-      if ( column_display == COL_DISP_FULL )
+      if ( ( column_display & COL_DISP_MASK ) == COL_DISP_FULL )
          cout << " " << setw(3) << steal << "% " << setw(3) << guest << "% " << setw(3) << guest_nice << "%";
 
+      if ( column_display & COL_FLG_SPEED )
+      cout << "  " << setw(4) << lc->cpu_mhz.erase(lc->cpu_mhz.find('.'));
+      
       cout.unsetf(ios::fixed);
       cout << flush; /* See note above on fflush() */
       
@@ -761,36 +750,3 @@ int Nodes::ScatterCPUStat(void)
    
    return(0);
 }
-
-#ifdef STUB_RELOCATED
-int LCore::GetLastRead(float &user,
-                       float &nice,
-                       float &system,
-                       float &idle,
-                       float &iowait,
-                       float &irq,
-                       float &softirq,
-                       float &steal,
-                       float &guest,
-                       float &guest_nice)
-{
-
-   float ftotal = total;
-   float temp_f;
-
-   /* STUB: Consider doing this in integer math? */
-   temp_f = this_user - last_user;
-   user = (temp_f / ftotal) * 100;
-
-   temp_f = this_nice - last_nice;
-   nice = (temp_f / ftotal) * 100;
-
-   temp_f = this_system - last_system;
-   system = (temp_f / ftotal) * 100;
-
-   temp_f = this_idle - last_idle;
-   idle = (temp_f / ftotal) * 100;
-
-   return(0);
-}
-#endif

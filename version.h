@@ -5,11 +5,17 @@
                    - Added comments and todos.
                    - Fixed bug with bad move in OptParse::IsExclusive()
                    - Cleanup work on parsing options.
-   0.3.0   12/5/16 - 
+   0.3.0   12/5/16 - Created cache info - per-logical core
+                   - Added MHz parsing and output.
+                   - Changed colors to more recognizable palate, and made
+                     them brighter.
+
 */
 #define VERSION_STRING "0.3.0"
 /*
   ToDo:
+   [ ] There should be a total count of physical cores in the dump pages.
+       The individual per-something lines are insufficient.
    [ ] Add the -i option and supporting code.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
    [ ] Validate socket parsing on a multi-socket system.
@@ -19,6 +25,7 @@
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] MHz output should be conditional. (Uses -p switch)
    [X] OptParse::IsExclusive() allows for list members that do not exist.
    [X] Utilize interval and iterations values.
    [X] assert() is not enforced on OptParse::WasFound() label mismatches.

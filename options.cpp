@@ -42,6 +42,9 @@ Options::Options(int argc, char *argv[])
    op.RegisterOption("display full", 'f');
    op.RegisterOption("display full", "display-full");
 
+   op.RegisterOption("display speed", 'p');
+   op.RegisterOption("display speed", "display-speed");
+
    op.RegisterOption("debug", '+');
 
    op.Resolve(argc, argv);
@@ -181,6 +184,8 @@ Options::Options(int argc, char *argv[])
   if ( op.WasFound("display full") )
      column_display = COL_DISP_FULL;
 
+  if ( op.WasFound("display speed") )
+     column_display |= COL_FLG_SPEED;
 
   op.GetState("interval", interval);
   op.GetState("iterations", iterations);
@@ -192,20 +197,24 @@ void Options::help(void)
    cout << "ccpu - Color CPU" << endl;
    cout << "   Usage: ccpu -a | -h | [options] [interval [iterations]]" << endl;
    cout << "   Options:" << endl;
-   cout << "     -a/--about     Show about information (and exit)" << endl;
-   cout << "     -h/--help      Show (this) help (and exit)" << endl;
-   cout << "     -d             Dump detailed cpu info (and exit)" << endl;
-   cout << "     -D             Dump \"simplified\" cpu layout (and exit)" << endl;
-   cout << "     -s             Denote socket boundaries in stats output." << endl;
-   cout << "     -m             Display \"most\" stats." << endl;
-   /* STUB: Describe here what "most" means. */
-   cout << "     -f             Display \"full\" stats." << endl;
+   cout << "     -a/--about            Show about information (and exit)" << endl;
+   cout << "     -h/--help             Show (this) help (and exit)" << endl;
+   cout << "     -d/--detailed-dump    Dump detailed cpu info (and exit)" << endl;
+   cout << "     -D/--simple-dump      Dump \"simplified\" cpu layout (and exit)" << endl;
+   cout << "     -s/--denote-sockets   Denote socket boundaries in stats output" << endl;
+   cout << "     -m/--display-most     Display \"most\" stats" << endl;
+   cout << "                           (User,Nice,Sys,Idle)+IOWait,Irq,SoftIRQ" << endl;
+   cout << "     -f/--display-full     Display \"full\" stats" << endl;
+   cout << "                           (\"most\")+Steal,Guest,GuestNice" << endl;
    /* STUB: Describe "full" */
+   cout << "     -p/--display-speed    Display CPU per-core speeds" << endl;
    /* STUB: Not yet implemented
    cout << "     -i             Display per-CPU interrupt statistics." << endl;
    */
    cout << flush;
 }
+
+
 
 void Options::about(void)
 {
