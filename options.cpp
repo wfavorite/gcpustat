@@ -30,6 +30,7 @@ Options::Options(int argc, char *argv[])
 
    op.RegisterOption("help", 'h');
    op.RegisterOption("help", "help");
+   
    op.RegisterOption("about", 'a');
    op.RegisterOption("about", "about");
 
@@ -125,17 +126,36 @@ Options::Options(int argc, char *argv[])
          cerr << "Display full  : un";
       cerr << "set" << endl;
 
-      /* STUB: Add speed and irq flags */
-      
+      if ( op.WasFound("display speed") )
+         cerr << "Display speed : ";
+      else
+         cerr << "Display speed : un";
+      cerr << "set" << endl;
+
+      if ( op.WasFound("display irq") )
+         cerr << "Display irq   : ";
+      else
+         cerr << "Display irq   : un";
+      cerr << "set" << endl;
    } /* End of debuggery output */
 
-   if ( ! op.IsExclusive("about", {"simple dump", "detailed dump", "interval", "iterations"}) )
+   /* The full list
+      - To be used for the exclusivity checks.
+      - Don't forget to add new on feature additions!
+      - A third bullet point
+
+   "interval", "simple dump", "detailed dump", "help", "about", "denote sockets", "display most", "display full", "display speed", "display irq"
+
+   */
+
+   /* Intentionally exclude help and about from both lists. We want the user to "gravitate" towards -h, allowing -a as a "warning. */
+   if ( ! op.IsExclusive("about", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq"}) )
    {
       cerr << "ERROR: The -a option is mutually exclusive of all other options." << endl;
       exit(1);
    }
 
-   if ( ! op.IsExclusive("help", {"simple dump", "detailed dump", "interval", "iterations"}) )
+   if ( ! op.IsExclusive("help", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq"}) )
    {
       cerr << "ERROR: The -h option is mutually exclusive of all other options." << endl;
       exit(1);
@@ -197,13 +217,13 @@ Options::Options(int argc, char *argv[])
 
   op.GetState("interval", interval);
   op.GetState("iterations", iterations);
-  
 };
 
+/* ========================================================================= */
 void Options::help(void)
 {
-   cout << "ccpu - Color CPU" << endl;
-   cout << "   Usage: ccpu -a | -h | [options] [interval [iterations]]" << endl;
+   cout << "gcpu - Graphical CPU Statistics" << endl;
+   cout << "   Usage: gcpu -a | -h | [options] [interval [iterations]]" << endl;
    cout << "   Options:" << endl;
    cout << "     -a/--about            Show about information (and exit)" << endl;
    cout << "     -h/--help             Show (this) help (and exit)" << endl;
@@ -214,20 +234,18 @@ void Options::help(void)
    cout << "                           (User,Nice,Sys,Idle)+IOWait,Irq,SoftIRQ" << endl;
    cout << "     -f/--display-full     Display \"full\" stats" << endl;
    cout << "                           (\"most\")+Steal,Guest,GuestNice" << endl;
-   /* STUB: Describe "full" */
    cout << "     -p/--display-speed    Display CPU per-core speeds" << endl;
-   /* STUB: Not yet implemented
-   cout << "     -i             Display per-CPU interrupt statistics." << endl;
-   */
+   cout << "     -i/--display-irq      Display per-CPU interrupt statistics." << endl;
    cout << flush;
 }
 
-
-
+/* ========================================================================= */
 void Options::about(void)
 {
-   cout << "ccpu - Color CPU" << endl;
+   cout << "gcpu - Graphical CPU Stat" << endl;
    cout << "   Version: " << VERSION_STRING << endl;
    cout << "   A tool for evaluating CPU and CPU scheduling" << endl;
-   cout << "   William Favorite <wfavorite@tablespace.net>" << endl;
+   cout << "    Ethan Allen <eallen@reason.vt>" << endl;
+   cout << "    William Favorite <wfavorite@tablespace.net>" << endl;
+   cout << flush;
 }

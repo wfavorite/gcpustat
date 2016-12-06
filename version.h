@@ -15,6 +15,9 @@
 #define VERSION_STRING "0.4.0"
 /*
   ToDo:
+   [ ] Not all CPUs have the max speed in the string identifier. The max speed
+       should be parsed during initialization and printed in the -d mode, and
+       perhaps be used (optionally) as a % of max in the output.
    [ ] The first iteration of stats should be collected *before* the main
        loop. My idea: Collect, wait one iteration, begin loop.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
