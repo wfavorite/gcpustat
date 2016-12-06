@@ -35,8 +35,9 @@ int main(int argc, char *argv[])
       break;
    }
 
-   if ( n.GatherInterrupts() )
-      return(0);
+   /* We are going to display, so gather a set of stats now (so our first
+      iteration will not be nonsensical). */
+   n.GatherCPUStat();
    
    /* The "normal" usage scenario. */
    itcnt = 0;
@@ -46,18 +47,15 @@ int main(int argc, char *argv[])
    
    while ( itcnt < iterations )
    {
+      sleep(o.interval);
+
       n.GatherCPUStat();
 
       n.ScatterCPUStat();
 
-      cout << endl; /* STUB: Move to Scatter */
-
       /* Only increment this if iterations is > 0 (see code above) */
       if ( itcnt >= 0 )
          itcnt++;
-
-      /* STUB: We sleep *after* the last iteration. This *should* be fixed. */
-      sleep(o.interval);
    }
 
    return(0);

@@ -23,7 +23,6 @@ public:
 
    /* Use a vector here because the logical cores are not indexed in the
       same manner as sockets and cores. They have an "absolute" mapping.
-      STUB: Yea, but what about when there is no hyperthreading? 
    */
    vector< LCore * > lcores;
 };

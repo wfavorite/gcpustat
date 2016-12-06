@@ -604,26 +604,8 @@ int OptParse::DumpErrors(void)
 
 /* ========================================================================= */
 /* This always returns a proper value (or it assert()s).                     */
-#ifdef STUB_BAD_MOVE
-OptItem OptParse::find_opt_item(string olabel)
-{
-   map<string, OptItem>::iterator itr = optlist.find(olabel);
-
-   if ( itr == optlist.end() )
-   {
-      /* This means that the *label* was not found. */
-      cerr << "ASSERT: BAD LABEL = \"" << olabel << "\"" << endl;
-      assert(0); /* assert() that the developer used a misspelled label */
-      exit(1);
-   }
-
-   return(itr->second);
-}
-#endif
-
 OptItem *OptParse::find_opt_item(string olabel)
 {
-   //OptItem *oir = NULL;
    map<string, OptItem>::iterator itr = optlist.find(olabel);
 
    if ( itr == optlist.end() )

@@ -73,7 +73,6 @@ Nodes::Nodes(Options &o)
             model_name = line.substr(i);
          }
 
-         /* STUB: This must be set to UNK at the top of each processor */
          if ( 0 == line.find("cpu MHz") )
          {
             i = line.find(':');
@@ -313,7 +312,7 @@ void Nodes::PrintLayout(int level)
                cout << "  ";
                cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz" << endl;
 
-               /* STUB: This may be conditional */
+               /* This is not conditional at this time. Detailed == cache. */
                p->DumpCacheLevels();
             }
             else
@@ -566,7 +565,7 @@ int Nodes::GatherCPUStat(void)
       procstat.close();
    } /* if ( procstat.is_open() ) */
    
-   
+   /* Collect data for the (current) CPU speed */
    if ( column_display & COL_FLG_SPEED )
    {
       ifstream cpuinfo("/proc/cpuinfo");
@@ -599,9 +598,6 @@ int Nodes::GatherCPUStat(void)
                
                /* cpu_mhz = line.substr(i); */
                olist[processor]->cpu_mhz = line.substr(i);
-               /*
-                 cerr << "proc" << processor << " @ " << line.substr(i) << " MHz" << endl;
-               */
             }
 
          } /* while(getline()) */
@@ -610,6 +606,7 @@ int Nodes::GatherCPUStat(void)
       } /* if ( cpuinfo.is_open() */
    }  /* if ( COL_FLG_SPEED ) */
 
+   /* Collect interrupt data */
    if ( column_display & COL_FLG_IRQ )
       GatherInterrupts();
 
@@ -698,6 +695,8 @@ int Nodes::ScatterCPUStat(void)
       if (( denote_sockets ) && ( 1 == l % socket_height ))
          cout << "sock" << s << endl;
 
+      /* This is a more busy-waited coloring scheme. It does not go yellow
+         and red until we are nearly out of CPU. */
       color = CYAN;
       if ( idle < 99 )
          color = GREEN;
@@ -742,10 +741,8 @@ int Nodes::ScatterCPUStat(void)
          cout << "   ";
 
       /* STUB: This is likely an extra space if denoting sockets. */
-      if (( denote_sockets ) && ( 0 == l % socket_height ) && ( l != cpu_count ))
-      {
+      if ((denote_sockets) && ( 0 == l % socket_height ) && ( l != cpu_count ))
          cout << endl;
-      }
 
       l++;
    }
@@ -760,7 +757,8 @@ int Nodes::ScatterCPUStat(void)
       cout << "cpu" << lc->processor << endl;
    }
 #endif
-   cout << flush;
+
+   cout << endl << flush;
    
    return(0);
 }

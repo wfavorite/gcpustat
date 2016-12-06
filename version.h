@@ -10,6 +10,8 @@
                    - Changed colors to more recognizable palate, and made
                      them brighter.
    0.4.0   12/6/16 - Added interrupt support to output statistics.
+                   - Cleanup of options.Xpp, fix help, about, and comments.
+                   - $TUB removal, documentation, cleanup.
 
 */
 #define VERSION_STRING "0.4.0"
@@ -18,16 +20,20 @@
    [ ] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.
-   [ ] The first iteration of stats should be collected *before* the main
-       loop. My idea: Collect, wait one iteration, begin loop.
+   [ ] cnodes.hpp needs some documentation for the class definitions and
+       members.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
    [ ] Validate socket parsing on a multi-socket system.
    [ ] Insure that we cannot be IS_POS_ARG and HAS_xD_ARG at the same time.
    [_] Add support for ALLOW_MULT.
    [ ] Normalize all the structure names to socket, core, logical (except
        where they clearly reference /proc/cpuinfo fields).
+   [ ] Consider adding support for -n(umerical ordering) that dumps in a
+       simple single column format (in numerical order).
 
   Done:
+   [X] The first iteration of stats should be collected *before* the main
+       loop. My idea: Collect, wait one iteration, begin loop.
    [X] Add the -i option and supporting code.
    [X] The last_interrupts values in the LCore class needs to be initialized.
    [X] There should be a total count of physical cores in the dump pages.
