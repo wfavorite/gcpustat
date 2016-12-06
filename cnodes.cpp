@@ -26,8 +26,6 @@ Nodes::Nodes(Options &o)
    column_display = o.column_display;
    denote_sockets = o.denote_sockets;
 
-
-   
    ifstream cpuinfo("/proc/cpuinfo");
    size_t i;
    
@@ -202,74 +200,9 @@ PCore::PCore(int cid)
    /* We will use this for iteration. Set to an impossible negative value. */
    max_processor = -1;
    
-   /* STUB: Clear the vector - Being pedantic */
+   /* Clear the vector - Being pedantic */
    lcores.clear();
 }
-
-/* ========================================================================= */
-void Nodes::PrintLayout(int level)
-{
-   int physical_id;
-   int core_id;
-   CSocket *s;
-   PCore *c;
-   LCore *p;
-
-   cout << "Core width (threads per core): " << width << endl;
-   cout << "Socket height (threads per socket): " << socket_height << endl;
-   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
-   cout << endl;
-   
-   physical_id = 0;
-   while ( physical_id <= max_physical_id )
-   {
-      s = sockets[physical_id];
-
-      cout << "SOCKET   " << s->physical_id;
-
-      if ( level == PRINT_LEVEL_FULL )
-      {
-         cout << "     ";
-         cout << s->model_name;
-      }
-
-      cout << endl;
-
-      core_id = 0;
-      while ( core_id <= s->max_core_id )
-      {
-         c = s->pcores[core_id];
-
-         cout << "  CORE " << c->core_id << endl;
-
-         for ( vector< LCore * >::iterator li = c->lcores.begin();
-               li != c->lcores.end();
-               li++)
-         {
-            p = *li;
-
-            cout << "    LOGICAL " << p->processor;
-            
-            if ( level == PRINT_LEVEL_FULL )
-            {
-               cout << "  ";
-               cout << p->cpu_mhz << endl;
-
-               /* STUB: This may be conditional */
-               p->DumpCacheLevels();
-            }
-            else
-               cout << endl;
-         }
-
-         core_id++;
-      }
-      physical_id++;
-   }
-
-   cout << flush;
-}
-
 
 /* ========================================================================= */
 int Nodes::BuildCPUList(void)
@@ -325,16 +258,84 @@ int Nodes::BuildCPUList(void)
 }
 
 /* ========================================================================= */
+void Nodes::PrintTopInfo(void)
+{
+   cout << "Total logical cores (threads in system): " << cpu_count << endl;
+   cout << "Core width (threads per core): " << width << endl;
+   cout << "Socket height (threads per socket): " << socket_height << endl;
+   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
+   cout << endl;
+}
+
+/* ========================================================================= */
+void Nodes::PrintLayout(int level)
+{
+   int physical_id;
+   int core_id;
+   CSocket *s;
+   PCore *c;
+   LCore *p;
+
+   PrintTopInfo();
+   
+   physical_id = 0;
+   while ( physical_id <= max_physical_id )
+   {
+      s = sockets[physical_id];
+
+      cout << "SOCKET   " << s->physical_id;
+
+      if ( level == PRINT_LEVEL_FULL )
+      {
+         cout << "     ";
+         cout << s->model_name;
+      }
+
+      cout << endl;
+
+      core_id = 0;
+      while ( core_id <= s->max_core_id )
+      {
+         c = s->pcores[core_id];
+
+         cout << "  CORE " << c->core_id << endl;
+
+         for ( vector< LCore * >::iterator li = c->lcores.begin();
+               li != c->lcores.end();
+               li++)
+         {
+            p = *li;
+
+            cout << "    LOGICAL " << p->processor;
+            
+            if ( level == PRINT_LEVEL_FULL )
+            {
+               cout << "  ";
+               cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz" << endl;
+
+               /* STUB: This may be conditional */
+               p->DumpCacheLevels();
+            }
+            else
+               cout << endl;
+         }
+
+         core_id++;
+      }
+      physical_id++;
+   }
+
+   cout << flush;
+}
+
+/* ========================================================================= */
 int Nodes::PrintLLayout(void)
 {
    unsigned int l = 1;
    LCore *lc;
 
-   cout << "Core width (threads per core): " << width << endl;
-   cout << "Socket height (threads per socket): " << socket_height << endl;
-   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
-   cout << endl;
-   
+   PrintTopInfo();
+
    for ( vector< LCore * >::iterator li = llist.begin();
          li != llist.end();
          li++)
@@ -566,48 +567,53 @@ int Nodes::GatherCPUStat(void)
    } /* if ( procstat.is_open() ) */
    
    
-
-
-   ifstream cpuinfo("/proc/cpuinfo");
-   int processor;
-   
-   if ( cpuinfo.is_open() )
+   if ( column_display & COL_FLG_SPEED )
    {
-      while(getline(cpuinfo, line))
+      ifstream cpuinfo("/proc/cpuinfo");
+      int processor;
+   
+      if ( cpuinfo.is_open() )
       {
-         if ( 0 == line.find("processor") )
+         while(getline(cpuinfo, line))
          {
-            i = line.find(':');
-
-            i++; /* Move off the ':' char */
+            if ( 0 == line.find("processor") )
+            {
+               i = line.find(':');
+               
+               i++; /* Move off the ':' char */
+               
+               while ( line[i] == ' ' )
+                  i++;
+               
+               processor = stoi(line.substr(i));
+            }
             
-            while ( line[i] == ' ' )
-               i++;
-
-            processor = stoi(line.substr(i));
-         }
-
-         if ( 0 == line.find("cpu MHz") )
-         {
-            i = line.find(':');
-
-            i++; /* Move off the ':' char */
-            
-            while ( line[i] == ' ' )
-               i++;
-
-            /* cpu_mhz = line.substr(i); */
-            olist[processor]->cpu_mhz = line.substr(i);
-            /*
+            if ( 0 == line.find("cpu MHz") )
+            {
+               i = line.find(':');
+               
+               i++; /* Move off the ':' char */
+               
+               while ( line[i] == ' ' )
+                  i++;
+               
+               /* cpu_mhz = line.substr(i); */
+               olist[processor]->cpu_mhz = line.substr(i);
+               /*
                  cerr << "proc" << processor << " @ " << line.substr(i) << " MHz" << endl;
-            */
-         }
+               */
+            }
 
+         } /* while(getline()) */
 
+         cpuinfo.close();
+      } /* if ( cpuinfo.is_open() */
+   }  /* if ( COL_FLG_SPEED ) */
 
-      }
-   }
+   if ( column_display & COL_FLG_IRQ )
+      GatherInterrupts();
 
+   
    return(0);
 }
 
@@ -652,6 +658,9 @@ int Nodes::ScatterCPUStat(void)
 
       if ( column_display & COL_FLG_SPEED )
          cout << "MHz   ";
+
+      if ( column_display & COL_FLG_IRQ )
+         cout << "IrqCnt   ";
       
    }
    cout << endl;
@@ -689,7 +698,6 @@ int Nodes::ScatterCPUStat(void)
       if (( denote_sockets ) && ( 1 == l % socket_height ))
          cout << "sock" << s << endl;
 
-
       color = CYAN;
       if ( idle < 99 )
          color = GREEN;
@@ -700,9 +708,11 @@ int Nodes::ScatterCPUStat(void)
       if ( idle <= 1 )
          color = MAGENTA;
       
-      printf("%c[%dm", 27, color);
+      printf("%c[%dm", 27, color); /* Apparently(?) cout does not support ANSI
+                                      code output. printf() to the rescue. */
       fflush(stdout); /* I flush because I don't know if printf and cout use 
-                         the same buffer. */
+                         the same buffer. I assume not, so each must be flushed
+                         before I can start dumping data into the other. */
       
       cout << fixed;
       cout << setprecision(0);
@@ -713,8 +723,12 @@ int Nodes::ScatterCPUStat(void)
       if ( ( column_display & COL_DISP_MASK ) == COL_DISP_FULL )
          cout << " " << setw(3) << steal << "% " << setw(3) << guest << "% " << setw(3) << guest_nice << "%";
 
+      /* Conditional items */
       if ( column_display & COL_FLG_SPEED )
       cout << "  " << setw(4) << lc->cpu_mhz.erase(lc->cpu_mhz.find('.'));
+      
+      if ( column_display & COL_FLG_IRQ )
+      cout << "  " << setw(7) << (lc->this_interrupts - lc->last_interrupts);
       
       cout.unsetf(ios::fixed);
       cout << flush; /* See note above on fflush() */
@@ -748,5 +762,69 @@ int Nodes::ScatterCPUStat(void)
 #endif
    cout << flush;
    
+   return(0);
+}
+
+/* ========================================================================= */
+int Nodes::GatherInterrupts(void)
+{
+   string line;
+   long llen;
+   unsigned int cpu;
+   int i;
+   rstat_t curval;
+
+   /* Reset the interrupt values */
+   cpu = 0; 
+   while ( cpu < cpu_count )
+   {
+      olist[cpu]->last_interrupts = olist[cpu]->this_interrupts;
+      olist[cpu]->this_interrupts = 0;
+      cpu++;
+   }
+
+   /* Collect the new interrupt values */
+   ifstream interrupts("/proc/interrupts");
+      
+   if ( interrupts.is_open() )
+   {
+      while(getline(interrupts, line))
+      {
+         llen = line.length();
+           
+         if ( llen < 4 )
+            continue;
+
+         if ( line[3] != ':' )
+            continue;
+
+         if ( ( line[0] != ' ' ) || (( line[0] < '0' ) && (line[0] > '9' )) )
+            continue;
+
+         cpu = 0; /* Reset the CPU counter */
+         i = 4;
+
+         while ( cpu < cpu_count )
+         {
+            /* Walk off the space */
+            while ( line[i] == ' ' )
+               i++;
+
+            curval = 0;
+            while (( line[i] >= '0' ) && ( line[i] <= '9' ))
+            {
+               curval *= 10;
+               curval += line[i] - '0';
+               i++;
+            }
+
+            olist[cpu]->this_interrupts += curval;
+
+            cpu++;
+         } /* COLUMNS - while ( cpu < cpu_count ) */
+      } /* ROWS - while ( getline() ) */
+      interrupts.close();
+   }
+
    return(0);
 }

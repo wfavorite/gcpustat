@@ -21,6 +21,20 @@ LCore::LCore(int lid, string &mhz)
    processor = lid;
    cpu_mhz = mhz;
 
+   /* Initialize all the last values - Just being pedantic. */
+   last_user = 0;
+   last_nice = 0;
+   last_system = 0;
+   last_idle = 0;
+   last_iowait = 0;
+   last_irq = 0;
+   last_softirq = 0;
+   last_steal = 0;
+   last_guest = 0;
+   last_guest_nice = 0;
+   last_interrupts = 0;
+
+   
    string cpudn = "/sys/devices/system/cpu/cpu" + to_string(lid) + "/cache/index";
    
    /* Moving these local - they are only used here. This is a
@@ -100,7 +114,6 @@ LCore::LCore(int lid, string &mhz)
       cache_index++;
    }
 
-   
 }
 
 /* ========================================================================= */

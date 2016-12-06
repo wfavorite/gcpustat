@@ -45,6 +45,9 @@ Options::Options(int argc, char *argv[])
    op.RegisterOption("display speed", 'p');
    op.RegisterOption("display speed", "display-speed");
 
+   op.RegisterOption("display irq", 'i');
+   op.RegisterOption("display irq", "display-irq");
+
    op.RegisterOption("debug", '+');
 
    op.Resolve(argc, argv);
@@ -121,6 +124,8 @@ Options::Options(int argc, char *argv[])
       else
          cerr << "Display full  : un";
       cerr << "set" << endl;
+
+      /* STUB: Add speed and irq flags */
       
    } /* End of debuggery output */
 
@@ -186,6 +191,9 @@ Options::Options(int argc, char *argv[])
 
   if ( op.WasFound("display speed") )
      column_display |= COL_FLG_SPEED;
+
+  if ( op.WasFound("display irq") )
+     column_display |= COL_FLG_IRQ;
 
   op.GetState("interval", interval);
   op.GetState("iterations", iterations);

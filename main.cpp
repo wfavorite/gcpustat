@@ -35,6 +35,9 @@ int main(int argc, char *argv[])
       break;
    }
 
+   if ( n.GatherInterrupts() )
+      return(0);
+   
    /* The "normal" usage scenario. */
    itcnt = 0;
    iterations = o.iterations; /* Move local ( and to signed val) */

@@ -9,14 +9,14 @@
                    - Added MHz parsing and output.
                    - Changed colors to more recognizable palate, and made
                      them brighter.
+   0.4.0   12/6/16 - Added interrupt support to output statistics.
 
 */
-#define VERSION_STRING "0.3.0"
+#define VERSION_STRING "0.4.0"
 /*
   ToDo:
-   [ ] There should be a total count of physical cores in the dump pages.
-       The individual per-something lines are insufficient.
-   [ ] Add the -i option and supporting code.
+   [ ] The first iteration of stats should be collected *before* the main
+       loop. My idea: Collect, wait one iteration, begin loop.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
    [ ] Validate socket parsing on a multi-socket system.
    [ ] Insure that we cannot be IS_POS_ARG and HAS_xD_ARG at the same time.
@@ -25,6 +25,10 @@
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] Add the -i option and supporting code.
+   [X] The last_interrupts values in the LCore class needs to be initialized.
+   [X] There should be a total count of physical cores in the dump pages.
+       The individual per-something lines are insufficient.
    [X] MHz output should be conditional. (Uses -p switch)
    [X] OptParse::IsExclusive() allows for list members that do not exist.
    [X] Utilize interval and iterations values.

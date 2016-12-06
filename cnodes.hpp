@@ -55,9 +55,12 @@ public:
    void PrintLayout(int level = PRINT_LEVEL_FULL);
    int BuildCPUList(void);
    int PrintLLayout(void);
-
+   void PrintTopInfo(void);
+   
    int GatherCPUStat(void);
    int ScatterCPUStat(void);
+
+   int GatherInterrupts(void);
    
    map < int, CSocket * > sockets;
 

@@ -6,11 +6,17 @@
 #include "optparse.hpp"
 
 /* Option values for what columns to display. (Used in cnodes.cpp)           */
+/* The first three bits store an absolute (mutually exclusive) value of what
+   "core" stats to DISPlay. The remainder bits store FLaGs of optional stats
+   to tack onto the end of the stats line. The MASK value is used to mask out
+   the first three bits. */
 const int COL_DISP_BASE = 1;
 const int COL_DISP_MOST = 2;
 const int COL_DISP_FULL = 3;
 const int COL_DISP_MASK = 3;
-const int COL_FLG_SPEED = 4;  /* This is independent of the others           */
+/* These are independent of the others           */
+const int COL_FLG_SPEED = 4;  
+const int COL_FLG_IRQ   = 8;  
 
 /* Option values for the dump (layout) options. (Used in main.cpp.)          */
 const int DUMP_OFF      = 0;

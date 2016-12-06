@@ -77,6 +77,16 @@ public:
 
    rstat_t total;
 
+   /* Optionally used interrupt counters. Note: There is no gettor, settor,
+      or (re)settor/roller for these values. They are only set by one 
+      function in the Nodes class, so it makes sense to just access them
+      directly to save performance over the jumps required to call the
+      various gettors/settors... (LCore is a class - it should probably
+      be a struct. The gettors and settors are for convenience, and most
+      values are accessed directly.) */
+   rstat_t this_interrupts;
+   rstat_t last_interrupts;
+   
    vector <LCCache> clevels;
 };
 
