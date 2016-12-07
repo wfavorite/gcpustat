@@ -9,7 +9,7 @@ In the *default* mode, gcpu allows you to view CPU utilization and scheduling in
  + color coded by utilization ("warmer" colours represent higher utilization, "cooler" colours represent lower utilization)
  + combined with alternative stats such as interrupts on that CPU and CPU speed
 
-Running at one-second intervals with speed (-p) and IRQ (-i) stats enabled. (Note that cpu0/cpu2 and cpu1/cpu3 are hyperthreads on the same physical core(s).)
+Running at one-second intervals with speed (-p) and IRQ (-i) stats enabled. (Note that cpu0/cpu2 and cpu1/cpu3 are hyperthreads on the same physical core(s). Also note: Actual output is in ANSI colour, MarkDown does not allow (*easy*) addition of colour to text.)
 <pre>
 ./gcpu -pi 1
       User Nice  Sys Idle   MHz   IrqCnt         User Nice  Sys Idle   MHz   IrqCnt   
