@@ -25,6 +25,8 @@ Nodes::Nodes(Options &o)
    cpu_count = 0;
    column_display = o.column_display;
    denote_sockets = o.denote_sockets;
+   output_format = o.output_format;
+   show_timestamp = o.show_timestamp;
 
    ifstream cpuinfo("/proc/cpuinfo");
    size_t i;
@@ -282,11 +284,11 @@ void Nodes::PrintLayout(int level)
    {
       s = sockets[physical_id];
 
-      cout << "SOCKET   " << s->physical_id;
+      cout << "SOCKET " << s->physical_id;
 
       if ( level == PRINT_LEVEL_FULL )
       {
-         cout << "     ";
+         cout << "   ";
          cout << s->model_name;
       }
 
@@ -309,7 +311,7 @@ void Nodes::PrintLayout(int level)
             
             if ( level == PRINT_LEVEL_FULL )
             {
-               cout << "  ";
+               cout << "   ";
                cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz" << endl;
 
                /* This is not conditional at this time. Detailed == cache. */
@@ -632,6 +634,8 @@ int Nodes::ScatterCPUStat(void)
    float guest;
    float guest_nice;
 
+   unsigned int dwidth; /* Derived width. Used to modify output. */
+
    /* These numbers have 3x area equivelants that are not as nice
       looking. I stick to the brighter 9x values, and stay away
       from the extended codes that may not have the same support. */
@@ -643,8 +647,22 @@ int Nodes::ScatterCPUStat(void)
    const int YELLOW = 93; /* 33 */
    
    int color;
+
+   if ( show_timestamp )
+   {
+      time_t t;
+      time(&t);
+
+      cout << ctime(&t);
+   }
+
    
-   for ( unsigned int i = 0; i < width; i++ )
+   if ( output_format == OUT_FORMAT_LOGICAL )
+      dwidth = width;
+   else
+      dwidth = 1;
+
+   for ( unsigned int i = 0; i < dwidth; i++ )
    {
       cout << "      User Nice  Sys Idle";
       if ( ( column_display & COL_DISP_MASK ) >= COL_DISP_MOST )
@@ -662,10 +680,27 @@ int Nodes::ScatterCPUStat(void)
    }
    cout << endl;
 
+   vector< LCore * >::iterator li;
+   vector< LCore * >::iterator liend;
+   if ( output_format == OUT_FORMAT_LOGICAL )
+   {
+      li = llist.begin();
+      liend = llist.end();
+   }
+   else
+   {
+      li = olist.begin();
+      liend = olist.end();
+      /* Here we set the sockets specifier as false. We are changing the
+         actual value, not a derived value. This is kind of bad, but... we
+         checked for it elsewhere, and this *should not* be set. So this
+         piece of code *should* have no effect. */
+      denote_sockets = false;
+   }
+      
+
    
-   for ( vector< LCore * >::iterator li = llist.begin();
-         li != llist.end();
-         li++)
+   while ( li != liend )
    {
       lc = *li; /* Compiler complains. I give up on casting. */
 
@@ -735,7 +770,7 @@ int Nodes::ScatterCPUStat(void)
       printf("%c[%dm", 27, NORMAL);
       fflush(stdout); /* Again. The same reason for gratitious flushing. */
       
-      if ( 0 == l % width )
+      if ( 0 == l % dwidth )
          cout << endl;
       else
          cout << "   ";
@@ -745,6 +780,8 @@ int Nodes::ScatterCPUStat(void)
          cout << endl;
 
       l++;
+      li++;
+
    }
 
 #ifdef LIST_ORDERED

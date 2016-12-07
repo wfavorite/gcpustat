@@ -79,6 +79,8 @@ public:
 
    int column_display;
    int denote_sockets;
+   int output_format;
+   bool show_timestamp;
 };
 
 #endif

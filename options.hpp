@@ -34,6 +34,10 @@ const int DUMP_OFF      = 0;
 const int DUMP_SIMPLE   = 1;
 const int DUMP_DETAILED = 2;
 
+const int OUT_FORMAT_LOGICAL = 0;
+const int OUT_FORMAT_ORDERED = 1;
+const int OUT_FORMAT_DEFAULT = OUT_FORMAT_LOGICAL;
+
 struct Options
 {
    unsigned long interval;
@@ -47,7 +51,10 @@ struct Options
                                  speed in the iterative output.              */
    bool debug;                /* Debuggery option to enable some extra 
                                  printing. Really about debugging OptParse.  */
-
+   int output_format;         /* The format of stats output: ORDERED or
+                                 LOGICAL.                                    */
+   bool show_timestamp;
+   
    /* Everything happens here (in the constructor). */
    Options(int argc, char *argv[]);
 

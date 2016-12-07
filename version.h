@@ -14,12 +14,14 @@
                    - $TUB removal, documentation, cleanup.
    0.5.0   12/7/16 - Updated README.md documentation.
                    - Added todos
+                   - Added support for -o(rdered output)
 
 */
-#define VERSION_STRING "0.4.0"
+#define VERSION_STRING "0.5.0"
 /*
   ToDo:
-   [ ] A monochrome mode and timestamp are required if this will be sent to
+   [ ] The GuestNice value goes extremely negative in -f(ull stats) mode.
+   [_] A monochrome mode and timestamp are required if this will be sent to
        a file. They can be implemented as a single item, or as two independent
        options.
    [ ] Probe for required files on startup and report if something is amiss.
@@ -35,10 +37,10 @@
    [_] Add support for ALLOW_MULT.
    [ ] Normalize all the structure names to socket, core, logical (except
        where they clearly reference /proc/cpuinfo fields).
-   [ ] Consider adding support for -n(umerical ordering) that dumps in a
-       simple single column format (in numerical order).
 
   Done:
+   [X] Consider adding support for -n(umerical ordering) that dumps in a
+       simple single column format (in numerical order). (Used -o(rdered))
    [X] The first iteration of stats should be collected *before* the main
        loop. My idea: Collect, wait one iteration, begin loop.
    [X] Add the -i option and supporting code.
