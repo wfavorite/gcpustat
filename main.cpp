@@ -5,6 +5,7 @@
 
 #include "options.hpp"
 #include "cnodes.hpp"
+#include "rfiles.hpp"
 
 using namespace std;
 
@@ -16,6 +17,10 @@ int main(int argc, char *argv[])
    /* Parse command line options */
    Options o(argc, argv);
 
+   ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts"});
+   if ( rf.DumpMissingFiles() )
+      return(1);
+   
    /* Parse out all the CPU nodes */
    Nodes n(o);
 
