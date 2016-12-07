@@ -24,7 +24,6 @@
 #define VERSION_STRING "0.5.0"
 /*
   ToDo:
-   [ ] Probe for required files on startup and report if something is amiss.
    [ ] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.
@@ -38,6 +37,7 @@
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] Probe for required files on startup and report if something is amiss.
    [X] The spacing between "SOCKET" and the socket number in -d mode is wrong.
    [X] The GuestNice value goes extremely negative in -f(ull stats) mode.
        (Some idiot just skipped that code in GetLastRead()!)
