@@ -19,6 +19,7 @@
                    - Added support for -M(onochrome).
                    - Fixed bug/omission of "most" and "full" stats mode.
                    - Added support for testing for required files.
+                   - Some code cleanup.
 
 */
 #define VERSION_STRING "0.5.0"
