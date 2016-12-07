@@ -12,11 +12,18 @@
    0.4.0   12/6/16 - Added interrupt support to output statistics.
                    - Cleanup of options.Xpp, fix help, about, and comments.
                    - $TUB removal, documentation, cleanup.
+   0.5.0   12/7/16 - Updated README.md documentation.
+                   - Added todos
 
 */
 #define VERSION_STRING "0.4.0"
 /*
   ToDo:
+   [ ] A monochrome mode and timestamp are required if this will be sent to
+       a file. They can be implemented as a single item, or as two independent
+       options.
+   [ ] Probe for required files on startup and report if something is amiss.
+   [ ] The spacing between "SOCKET" and the socket number in -d mode is wrong.
    [ ] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.
