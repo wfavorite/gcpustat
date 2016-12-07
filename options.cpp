@@ -18,6 +18,7 @@ Options::Options(int argc, char *argv[])
    column_display = COL_DISP_BASE;
    output_format = OUT_FORMAT_DEFAULT;
    show_timestamp = false;
+   monochrome = false;
    
    OptParse op;
 
@@ -56,6 +57,9 @@ Options::Options(int argc, char *argv[])
 
    op.RegisterOption("timestamp", 't');
    op.RegisterOption("timestamp", "timestamp");
+
+   op.RegisterOption("monochrome", 'M');
+   op.RegisterOption("monochrome", "monochrome");
 
    op.RegisterOption("debug", '+');
 
@@ -152,11 +156,16 @@ Options::Options(int argc, char *argv[])
          cerr << "CPUs -ordered : un";
       cerr << "set" << endl;
 
-
       if ( op.WasFound("timestamp") )
          cerr << "Show timestamp: ";
       else
          cerr << "Show timestamp: un";
+      cerr << "set" << endl;
+
+      if ( op.WasFound("monochrome") )
+         cerr << "Monochrome    : ";
+      else
+         cerr << "Monochrome    : un";
       cerr << "set" << endl;
 
 
@@ -167,18 +176,18 @@ Options::Options(int argc, char *argv[])
       - Don't forget to add new on feature additions!
       - A third bullet point
 
-   "interval", "simple dump", "detailed dump", "help", "about", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp"
+   "interval", "simple dump", "detailed dump", "help", "about", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"
 
    */
 
    /* Intentionally exclude help and about from both lists. We want the user to "gravitate" towards -h, allowing -a as a "warning. */
-   if ( ! op.IsExclusive("about", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp"}) )
+   if ( ! op.IsExclusive("about", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"}) )
    {
       cerr << "ERROR: The -a option is mutually exclusive of all other options." << endl;
       exit(1);
    }
 
-   if ( ! op.IsExclusive("help", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp"}) )
+   if ( ! op.IsExclusive("help", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"}) )
    {
       cerr << "ERROR: The -h option is mutually exclusive of all other options." << endl;
       exit(1);
@@ -250,6 +259,9 @@ Options::Options(int argc, char *argv[])
   if ( op.WasFound("timestamp") )
      show_timestamp = true;
 
+  if ( op.WasFound("monochrome") )
+     monochrome = true;
+
   op.GetState("interval", interval);
   op.GetState("iterations", iterations);
 };
@@ -273,6 +285,7 @@ void Options::help(void)
    cout << "     -i/--display-irq      Display per-CPU interrupt statistics" << endl;
    cout << "     -o/--output-ordered   Display CPU stats in ordered, not logical, layout" << endl;
    cout << "     -t/--timestamp        Show timestamp of each stats iteration" << endl;
+   cout << "     -M/--monochrome       Display stats monochrome / without colour" << endl;
    cout << flush;
 }
 

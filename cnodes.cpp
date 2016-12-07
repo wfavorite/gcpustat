@@ -27,6 +27,7 @@ Nodes::Nodes(Options &o)
    denote_sockets = o.denote_sockets;
    output_format = o.output_format;
    show_timestamp = o.show_timestamp;
+   monochrome = o.monochrome;
 
    ifstream cpuinfo("/proc/cpuinfo");
    size_t i;
@@ -732,21 +733,26 @@ int Nodes::ScatterCPUStat(void)
 
       /* This is a more busy-waited coloring scheme. It does not go yellow
          and red until we are nearly out of CPU. */
-      color = CYAN;
-      if ( idle < 99 )
-         color = GREEN;
-      if ( idle < 30 )
-         color = YELLOW;
-      if ( idle < 15 )
-         color = RED;
-      if ( idle <= 1 )
+      if ( ! monochrome )
+      {
+         color = CYAN;
+         if ( idle < 99 )
+            color = GREEN;
+         if ( idle < 30 )
+            color = YELLOW;
+         if ( idle < 15 )
+            color = RED;
+         if ( idle <= 1 )
          color = MAGENTA;
-      
-      printf("%c[%dm", 27, color); /* Apparently(?) cout does not support ANSI
-                                      code output. printf() to the rescue. */
-      fflush(stdout); /* I flush because I don't know if printf and cout use 
-                         the same buffer. I assume not, so each must be flushed
-                         before I can start dumping data into the other. */
+         
+         printf("%c[%dm", 27, color); /* Apparently(?) cout does not support 
+                                         ANSI code output. printf() to the 
+                                         rescue. */
+         fflush(stdout); /* I flush because I don't know if printf and cout 
+                            use the same buffer. I assume not, so each must be
+                            flushed before I can start dumping data into the
+                            other. */
+      }
       
       cout << fixed;
       cout << setprecision(0);
@@ -766,9 +772,12 @@ int Nodes::ScatterCPUStat(void)
       
       cout.unsetf(ios::fixed);
       cout << flush; /* See note above on fflush() */
-      
-      printf("%c[%dm", 27, NORMAL);
-      fflush(stdout); /* Again. The same reason for gratitious flushing. */
+
+      if ( ! monochrome )
+      {
+         printf("%c[%dm", 27, NORMAL);
+         fflush(stdout); /* Again. The same reason for gratitious flushing. */
+      }
       
       if ( 0 == l % dwidth )
          cout << endl;

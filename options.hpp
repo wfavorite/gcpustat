@@ -54,6 +54,7 @@ struct Options
    int output_format;         /* The format of stats output: ORDERED or
                                  LOGICAL.                                    */
    bool show_timestamp;
+   bool monochrome;
    
    /* Everything happens here (in the constructor). */
    Options(int argc, char *argv[]);

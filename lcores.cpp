@@ -180,7 +180,7 @@ int LCore::GetLastRead(float &user,
 
    float ftotal = total;
    float temp_f;
-
+   
    /* STUB: Consider doing this in integer math? */
    temp_f = this_user - last_user;
    user = (temp_f / ftotal) * 100;
@@ -194,6 +194,24 @@ int LCore::GetLastRead(float &user,
    temp_f = this_idle - last_idle;
    idle = (temp_f / ftotal) * 100;
 
+   temp_f = this_iowait - last_iowait;
+   iowait = (temp_f / ftotal) * 100;
+
+   temp_f = this_irq - last_irq;
+   irq = (temp_f / ftotal) * 100;
+
+   temp_f = this_softirq - last_softirq;
+   softirq = (temp_f / ftotal) * 100;
+
+   temp_f = this_steal - last_steal;
+   steal = (temp_f / ftotal) * 100;
+
+   temp_f = this_guest - last_guest;
+   guest = (temp_f / ftotal) * 100;
+
+   temp_f = this_guest_nice - last_guest_nice;
+   guest_nice = (temp_f / ftotal) * 100;
+   
    return(0);
 }
 

@@ -13,19 +13,17 @@
                    - Cleanup of options.Xpp, fix help, about, and comments.
                    - $TUB removal, documentation, cleanup.
    0.5.0   12/7/16 - Updated README.md documentation.
-                   - Added todos
-                   - Added support for -o(rdered output)
+                   - Added todos.
+                   - Added support for -o(rdered output).
+                   - Added support for -t(imestamp).
+                   - Added support for -M(onochrome).
+                   - Fixed bug/omission of "most" and "full" stats mode.
 
 */
 #define VERSION_STRING "0.5.0"
 /*
   ToDo:
-   [ ] The GuestNice value goes extremely negative in -f(ull stats) mode.
-   [_] A monochrome mode and timestamp are required if this will be sent to
-       a file. They can be implemented as a single item, or as two independent
-       options.
    [ ] Probe for required files on startup and report if something is amiss.
-   [ ] The spacing between "SOCKET" and the socket number in -d mode is wrong.
    [ ] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.
@@ -39,6 +37,12 @@
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] The spacing between "SOCKET" and the socket number in -d mode is wrong.
+   [X] The GuestNice value goes extremely negative in -f(ull stats) mode.
+       (Some idiot just skipped that code in GetLastRead()!)
+   [X] A monochrome mode and timestamp are required if this will be sent to
+       a file. They can be implemented as a single item, or as two independent
+       options.
    [X] Consider adding support for -n(umerical ordering) that dumps in a
        simple single column format (in numerical order). (Used -o(rdered))
    [X] The first iteration of stats should be collected *before* the main
