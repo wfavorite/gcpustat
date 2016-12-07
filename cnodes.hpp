@@ -77,11 +77,13 @@ public:
    vector<LCore *> llist;      /* Logically ordered list (for printing).     */
    vector<LCore *> olist;      /* "Ordered" list for gathering stats.        */
 
-   int column_display;
-   int denote_sockets;
-   int output_format;
-   bool show_timestamp;
-   bool monochrome;
+   /* Passed options */
+   int column_display;         /* How many columns to display (first three 
+                                  bits) and other flags (remaining bits)     */
+   int denote_sockets;         /* To denote socket boundaries in output      */
+   int output_format;          /* ORDERED or LOGICAL layout of CPUs          */
+   bool show_timestamp;        /* To show timestamps or not                  */
+   bool monochrome;            /* To use monochrome output or not            */
 };
 
 #endif

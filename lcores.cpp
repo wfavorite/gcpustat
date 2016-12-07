@@ -167,21 +167,19 @@ return(0);
 
 /* ========================================================================= */
 int LCore::GetLastRead(float &user,
-                          float &nice,
-                          float &system,
-                          float &idle,
-                          float &iowait,
-                          float &irq,
-                          float &softirq,
-                          float &steal,
-                          float &guest,
-                          float &guest_nice)
+                       float &nice,
+                       float &system,
+                       float &idle,
+                       float &iowait,
+                       float &irq,
+                       float &softirq,
+                       float &steal,
+                       float &guest,
+                       float &guest_nice)
 {
-
    float ftotal = total;
    float temp_f;
    
-   /* STUB: Consider doing this in integer math? */
    temp_f = this_user - last_user;
    user = (temp_f / ftotal) * 100;
 
@@ -222,7 +220,7 @@ int LCore::DumpCacheLevels(void)
    
    for (auto vi : clevels )
    {
-      cerr << "      CACHE level=" << vi.level << "; type=" << vi.type << "; size=" << vi.size << ";" << endl;
+      cerr << "      CACHE level=" << vi.level << "; type=" << vi.type << "; size=" << vi.size << ";\n";
       cnt++;
    }
 

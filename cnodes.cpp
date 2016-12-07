@@ -34,8 +34,6 @@ Nodes::Nodes(Options &o)
    
    if ( cpuinfo.is_open() )
    {
-      //cproc = -1;
-      
       while(getline(cpuinfo, line))
       {
          if ( 0 == line.find("processor") )
@@ -262,11 +260,11 @@ int Nodes::BuildCPUList(void)
 /* ========================================================================= */
 void Nodes::PrintTopInfo(void)
 {
-   cout << "Total logical cores (threads in system): " << cpu_count << endl;
-   cout << "Core width (threads per core): " << width << endl;
-   cout << "Socket height (threads per socket): " << socket_height << endl;
-   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
-   cout << endl;
+   cout << "Total logical cores (threads in system): " << cpu_count << "\n";
+   cout << "Core width (threads per core): " << width << "\n";
+   cout << "Socket height (threads per socket): " << socket_height << "\n";
+   cout << "Socket height (cores per socket): " << (socket_height / width) << "\n";
+   cout << "\n";
 }
 
 /* ========================================================================= */
@@ -293,14 +291,14 @@ void Nodes::PrintLayout(int level)
          cout << s->model_name;
       }
 
-      cout << endl;
+      cout << "\n";
 
       core_id = 0;
       while ( core_id <= s->max_core_id )
       {
          c = s->pcores[core_id];
 
-         cout << "  CORE " << c->core_id << endl;
+         cout << "  CORE " << c->core_id << "\n";
 
          for ( vector< LCore * >::iterator li = c->lcores.begin();
                li != c->lcores.end();
@@ -313,13 +311,13 @@ void Nodes::PrintLayout(int level)
             if ( level == PRINT_LEVEL_FULL )
             {
                cout << "   ";
-               cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz" << endl;
+               cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz\n";
 
                /* This is not conditional at this time. Detailed == cache. */
                p->DumpCacheLevels();
             }
             else
-               cout << endl;
+               cout << "\n";
          }
 
          core_id++;
@@ -346,13 +344,13 @@ int Nodes::PrintLLayout(void)
       cout << "cpu" << lc->processor;
       
       if ( 0 == l % width )
-         cout << endl;
+         cout << "\n";
       else
          cout << "   ";
 
       if (( 0 == l % socket_height ) && ( l != cpu_count ))
       {
-         cout << endl;
+         cout << "\n";
       }
 
       l++;
@@ -365,7 +363,7 @@ int Nodes::PrintLLayout(void)
          li++)
    {
       lc = *li;
-      cout << "cpu" << lc->processor << endl;
+      cout << "cpu" << lc->processor << "\n";
    }
 #endif
    cout << flush;
@@ -536,18 +534,18 @@ int Nodes::GatherCPUStat(void)
 
                
 #ifdef DEBUGGERY
-               cerr << "CPU(" << cpunum << ") [" << line[i] << "] " << line << endl;
-               cerr << "  user = " << user << endl;
-               cerr << "  nice = " << nice << endl;
-               cerr << "  system = " << system << endl;
-               cerr << "  idle = " << idle << endl;
-               cerr << "  iowait = " << iowait << endl;
-               cerr << "  irq = " << irq << endl;
-               cerr << "  softirq = " << softirq << endl;
-               cerr << "  steal = " << steal << endl;
-               cerr << "  guest = " << guest << endl;               
-               cerr << "  guest_nice = " << guest_nice << endl;
-               cerr << "  bogus = " << bogus << endl;
+               cerr << "CPU(" << cpunum << ") [" << line[i] << "] " << line << "\n";
+               cerr << "  user = " << user << "\n";
+               cerr << "  nice = " << nice << "\n";
+               cerr << "  system = " << system << "\n";
+               cerr << "  idle = " << idle << "\n";
+               cerr << "  iowait = " << iowait << "\n";
+               cerr << "  irq = " << irq << "\n";
+               cerr << "  softirq = " << softirq << "\n";
+               cerr << "  steal = " << steal << "\n";
+               cerr << "  guest = " << guest << "\n";               
+               cerr << "  guest_nice = " << guest_nice << "\n";
+               cerr << "  bogus = " << bogus << "\n";
 #endif
                olist[cpunum]->InsertNewRead(user,
                                             nice,
@@ -679,7 +677,7 @@ int Nodes::ScatterCPUStat(void)
          cout << "IrqCnt   ";
       
    }
-   cout << endl;
+   cout << "\n";
 
    vector< LCore * >::iterator li;
    vector< LCore * >::iterator liend;
@@ -729,7 +727,7 @@ int Nodes::ScatterCPUStat(void)
       }                                      /* signal processing           */
 
       if (( denote_sockets ) && ( 1 == l % socket_height ))
-         cout << "sock" << s << endl;
+         cout << "sock" << s << "\n";
 
       /* This is a more busy-waited coloring scheme. It does not go yellow
          and red until we are nearly out of CPU. */
@@ -780,13 +778,13 @@ int Nodes::ScatterCPUStat(void)
       }
       
       if ( 0 == l % dwidth )
-         cout << endl;
+         cout << "\n";
       else
          cout << "   ";
 
       /* STUB: This is likely an extra space if denoting sockets. */
       if ((denote_sockets) && ( 0 == l % socket_height ) && ( l != cpu_count ))
-         cout << endl;
+         cout << "\n";
 
       l++;
       li++;
@@ -800,11 +798,11 @@ int Nodes::ScatterCPUStat(void)
          li++)
    {
       lc = *li;
-      cout << "cpu" << lc->processor << endl;
+      cout << "cpu" << lc->processor << "\n";
    }
 #endif
 
-   cout << endl << flush;
+   cout << "\n" << flush;
    
    return(0);
 }

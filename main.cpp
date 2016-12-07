@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
    /* Parse command line options */
    Options o(argc, argv);
 
+   /* Check for required files. FWIW: Does not fall out of scope here. */
    ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts"});
    if ( rf.DumpMissingFiles() )
       return(1);
