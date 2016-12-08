@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <unistd.h>
+#include <cstring>
 
 #include "lcores.hpp"
 
@@ -12,6 +14,133 @@ LCCache::LCCache(string &nlevel, string &ntype, string &nsize)
    size = nsize;
 }
 
+SpeedInfo::SpeedInfo(unsigned int lcore)
+{
+   size_t len;
+   size_t i;
+
+   cpu = lcore;
+   is_valid = true; /* Assume true to start */
+   
+   /* Check (again) before trying to collect data */
+   if ( ! CanGather(lcore) )
+   {
+      is_valid = false;
+      return;
+   }
+
+   string basepath = "/sys/devices/system/cpu/cpu" + to_string(lcore) + "/cpufreq";
+
+   /* Find the current driver */
+   string driver_fname = basepath + "/scaling_driver";
+   ifstream driver_file(driver_fname.c_str());
+   if ( driver_file.is_open() )
+   {
+      if ( ! getline(driver_file, scaling_driver) )
+      {
+         scaling_driver = "UNK";
+         is_valid = false;
+         return;
+      }
+      driver_file.close();
+   }
+
+   string governor_fname = basepath + "/scaling_governor";
+   ifstream governor_file(governor_fname.c_str());
+   if ( governor_file.is_open() )
+   {
+      if ( ! getline(governor_file, scaling_governor) )
+      {
+         scaling_governor = "UNK";
+         is_valid = false;
+         return;
+      }
+      governor_file.close();
+   }
+
+   /* Soft */
+   string smax_freq_fname = basepath + "/scaling_max_freq";
+   ifstream smax_freq_file(smax_freq_fname.c_str());
+   if ( smax_freq_file.is_open() )
+   {
+      if ( ! getline(smax_freq_file, scaling_max_freq) )
+      {
+         scaling_max_freq = "UNK";
+         is_valid = false;
+         return;
+      }
+
+      len = scaling_max_freq.size();
+      i = 0;
+      soft_max_mhz = 0;
+      while ( i < len )
+      {
+         soft_max_mhz *= 10;
+         soft_max_mhz += (scaling_max_freq[i] - '0');
+         i++;
+      }
+
+      /* Convert from Hz to MHz */
+      soft_max_mhz /= 1000;
+      
+      smax_freq_file.close();
+   }
+
+   /* Hard */
+   string cmax_freq_fname = basepath + "/cpuinfo_max_freq";
+   ifstream cmax_freq_file(cmax_freq_fname.c_str());
+   if ( cmax_freq_file.is_open() )
+   {
+      if ( ! getline(cmax_freq_file, cpuinfo_max_freq) )
+      {
+         cpuinfo_max_freq = "UNK";
+         is_valid = false;
+         return;
+      }
+      
+      len = cpuinfo_max_freq.size();
+      i = 0;
+      hard_max_mhz = 0;
+      while ( i < len )
+      {
+         hard_max_mhz *= 10;
+         hard_max_mhz += (cpuinfo_max_freq[i] - '0');
+         i++;
+      }
+
+      /* Convert from Hz to MHz */
+      hard_max_mhz /= 1000;
+
+      cmax_freq_file.close();
+   }
+
+}
+
+/* ========================================================================= */
+bool SpeedInfo::CanGather(unsigned int lcore)
+{
+   string basepath = "/sys/devices/system/cpu/cpu" + to_string(lcore) + "/cpufreq"; 
+
+   if ( 0 != access(basepath.c_str(), F_OK) )
+   {
+      /* The CPU speed scaling driver is not installed. */
+      return(false);
+   }
+
+   return(true);
+}
+
+int SpeedInfo::DumpLine(void)
+{
+   if ( ! is_valid )
+      return(1);
+
+   cout << "driver=" << scaling_driver << "; governor=" << scaling_governor << ";";
+   cout << " hard=" << hard_max_mhz << "; soft=" << soft_max_mhz << "\n";
+
+   return(0);
+}
+
 /* ========================================================================= */
 LCore::LCore(int lid, string &mhz)
 {
@@ -20,6 +149,8 @@ LCore::LCore(int lid, string &mhz)
    /* Lay in the initializing ("local") values */
    processor = lid;
    cpu_mhz = mhz;
+   max_speed = atol(cpu_mhz.c_str());
+   speeds = nullptr;
 
    /* Initialize all the last values - Just being pedantic. */
    last_user = 0;
@@ -114,6 +245,17 @@ LCore::LCore(int lid, string &mhz)
       cache_index++;
    }
 
+   GatherSpeedInfo();
+   /* STUB: Broken */
+   max_speed = speeds->GetMaxHardMHz();
+}
+
+/* ========================================================================= */
+LCore::~LCore(void)
+{
+   /* SpeedInfo is only conditionally created. */
+   if ( nullptr != speeds )
+      delete speeds;
 }
 
 /* ========================================================================= */
@@ -227,3 +369,31 @@ int LCore::DumpCacheLevels(void)
    return(cnt);
 }
 
+/* ========================================================================= */
+int LCore::GatherSpeedInfo(void)
+{
+   
+   if ( SpeedInfo::CanGather(processor) )
+   {
+      speeds = new SpeedInfo(processor);
+      return(0);
+   }
+   
+   return(1);
+}
+
+/* ========================================================================= */
+int LCore::DumpSpeedInfo(void)
+{
+   if ( nullptr != speeds )
+   {
+      if ( speeds->DumpLine() )
+         cout << cpu_mhz.erase(cpu_mhz.find('.')) << " MHz\n";
+   }
+   else
+   {
+      cout << cpu_mhz.erase(cpu_mhz.find('.')) << " MHz\n";
+   }
+
+   return(0);
+}

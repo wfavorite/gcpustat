@@ -9,7 +9,29 @@ using namespace std;
 /* This is the datatype used to hold r(aw) stats */
 typedef unsigned long long rstat_t;
 
+/* ========================================================================= */
+class SpeedInfo
+{
+public:
+   SpeedInfo(unsigned int lcore);
+   static bool CanGather(unsigned int lcore);
+   int DumpLine(void);
+   float GetMaxHardMHz(void) { if ( is_valid ) { return(hard_max_mhz); }; return(0); }
 
+private:
+   bool is_valid;
+   unsigned int cpu;
+   unsigned long hard_max_mhz;
+   unsigned long soft_max_mhz;
+   
+   string scaling_driver;
+   string scaling_governor;
+   string cpuinfo_max_freq; /* Hz */
+   string scaling_max_freq; /* Hz */
+   //string scaling_cur_freq;
+};
+
+/* ========================================================================= */
 struct LCCache /* Logical core cache */
 {
    /* Just keep these as strings (rather than convert back-n-forth). */
@@ -20,11 +42,13 @@ struct LCCache /* Logical core cache */
    LCCache(string &nlevel, string &ntype, string &nsize);
 };
 
+
 /* ========================================================================= */
 class LCore
 {
 public:
    LCore(int lid, string &mhz);
+   ~LCore();
 
    int InsertNewRead(rstat_t this_user,
                      rstat_t this_nice,
@@ -49,9 +73,16 @@ public:
                    float &guest_nice);
 
    int DumpCacheLevels(void);
+
+   int GatherSpeedInfo(void);
+   int DumpSpeedInfo(void);
    
    int processor;
    string cpu_mhz;
+   SpeedInfo *speeds;
+   /* Used to calc pct of max */
+   float max_speed;
+   float cur_speed;
 
    rstat_t this_user;
    rstat_t this_nice;

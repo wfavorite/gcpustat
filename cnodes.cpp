@@ -311,7 +311,10 @@ void Nodes::PrintLayout(int level)
             if ( level == PRINT_LEVEL_FULL )
             {
                cout << "   ";
-               cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz\n";
+               /* STUB: Old
+                  cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz\n";
+               */
+               p->DumpSpeedInfo();
 
                /* This is not conditional at this time. Detailed == cache. */
                p->DumpCacheLevels();
@@ -567,7 +570,7 @@ int Nodes::GatherCPUStat(void)
    } /* if ( procstat.is_open() ) */
    
    /* Collect data for the (current) CPU speed */
-   if ( column_display & COL_FLG_SPEED )
+   if (( column_display & COL_FLG_SPEED ) || ( column_display & COL_FLG_PCTSP ))
    {
       ifstream cpuinfo("/proc/cpuinfo");
       int processor;
@@ -599,6 +602,12 @@ int Nodes::GatherCPUStat(void)
                
                /* cpu_mhz = line.substr(i); */
                olist[processor]->cpu_mhz = line.substr(i);
+
+               /* Convert - regardless */
+               unsigned long cur_speed = atol(olist[processor]->cpu_mhz.c_str());
+               /* STUB: Fix ALL of this noize */
+               olist[processor]->cur_speed = cur_speed;
+               
             }
 
          } /* while(getline()) */
@@ -668,13 +677,18 @@ int Nodes::ScatterCPUStat(void)
          cout << " IOwt  Irq SIrq";
       if ( ( column_display & COL_DISP_MASK ) == COL_DISP_FULL )
          cout << "  Stl  Gst  GNi";
-      cout << "   ";
+
 
       if ( column_display & COL_FLG_SPEED )
-         cout << "MHz   ";
+         cout << "   MHz";
 
+      if ( column_display & COL_FLG_PCTSP )
+         cout << " Speed";
+      
       if ( column_display & COL_FLG_IRQ )
-         cout << "IrqCnt   ";
+         cout << "   IrqCnt";
+
+      cout << "   ";
       
    }
    cout << "\n";
@@ -763,7 +777,10 @@ int Nodes::ScatterCPUStat(void)
 
       /* Conditional items */
       if ( column_display & COL_FLG_SPEED )
-      cout << "  " << setw(4) << lc->cpu_mhz.erase(lc->cpu_mhz.find('.'));
+         cout << "  " << setw(4) << lc->cpu_mhz.erase(lc->cpu_mhz.find('.'));
+
+      if ( column_display & COL_FLG_PCTSP )
+         cout << "  " << setw(3) << ((lc->cur_speed / lc->max_speed ) * 100 ) << "%";
       
       if ( column_display & COL_FLG_IRQ )
       cout << "  " << setw(7) << (lc->this_interrupts - lc->last_interrupts);

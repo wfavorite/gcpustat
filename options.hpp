@@ -21,13 +21,14 @@
    "core" stats to DISPlay. The remainder bits store FLaGs of optional stats
    to tack onto the end of the stats line. The MASK value is used to mask out
    the first three bits. */
-const int COL_DISP_BASE = 1;
-const int COL_DISP_MOST = 2;
-const int COL_DISP_FULL = 3;
-const int COL_DISP_MASK = 3;
+const int COL_DISP_BASE =  1;
+const int COL_DISP_MOST =  2;
+const int COL_DISP_FULL =  3;
+const int COL_DISP_MASK =  3;
 /* These are independent of the others                                       */
-const int COL_FLG_SPEED = 4;  
-const int COL_FLG_IRQ   = 8;  
+const int COL_FLG_SPEED =  4; /* Actual speed in MHz         */
+const int COL_FLG_PCTSP =  8; /* Percentage of maximum speed */
+const int COL_FLG_IRQ   = 16;  
 
 /* Option values for the dump (layout) options. (Used in main.cpp.)          */
 const int DUMP_OFF      = 0;

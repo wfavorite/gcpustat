@@ -49,6 +49,9 @@ Options::Options(int argc, char *argv[])
    op.RegisterOption("display speed", 'p');
    op.RegisterOption("display speed", "display-speed");
 
+   op.RegisterOption("display pspeed", 'P');
+   op.RegisterOption("display pspeed", "disp-pctspeed");
+
    op.RegisterOption("display irq", 'i');
    op.RegisterOption("display irq", "display-irq");
 
@@ -176,18 +179,18 @@ Options::Options(int argc, char *argv[])
       - Don't forget to add new on feature additions!
       - A third bullet point
 
-   "interval", "simple dump", "detailed dump", "help", "about", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"
+   "interval", "simple dump", "detailed dump", "help", "about", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome", "display pspeed"
 
    */
 
    /* Intentionally exclude help and about from both lists. We want the user to "gravitate" towards -h, allowing -a as a "warning. */
-   if ( ! op.IsExclusive("about", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"}) )
+   if ( ! op.IsExclusive("about", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome", "display pspeed"}) )
    {
       cerr << "ERROR: The -a option is mutually exclusive of all other options." << endl;
       exit(1);
    }
 
-   if ( ! op.IsExclusive("help", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome"}) )
+   if ( ! op.IsExclusive("help", {"interval", "simple dump", "detailed dump", "denote sockets", "display most", "display full", "display speed", "display irq", "output ordered", "timestamp", "monochrome", "display pspeed"}) )
    {
       cerr << "ERROR: The -h option is mutually exclusive of all other options." << endl;
       exit(1);
@@ -247,8 +250,17 @@ Options::Options(int argc, char *argv[])
   if ( op.WasFound("display full") )
      column_display = COL_DISP_FULL;
 
+  if ( ! op.IsExclusive("display speed", {"display pspeed"}) )
+   {
+      cerr << "ERROR: The -p (speed) and -P(ct speed) options are mutually exclusive." << endl;
+      exit(1);
+   }
+
   if ( op.WasFound("display speed") )
      column_display |= COL_FLG_SPEED;
+
+  if ( op.WasFound("display pspeed") )
+     column_display |= COL_FLG_PCTSP;
 
   if ( op.WasFound("display irq") )
      column_display |= COL_FLG_IRQ;
@@ -282,6 +294,7 @@ void Options::help(void)
    cout << "     -f/--display-full     Display \"full\" stats" << endl;
    cout << "                           (\"most\")+Steal,Guest,GuestNice" << endl;
    cout << "     -p/--display-speed    Display CPU per-core speeds" << endl;
+   cout << "     -P/--disp-pctspeed    Display CPU per-core speeds as pct of max" << endl;
    cout << "     -i/--display-irq      Display per-CPU interrupt statistics" << endl;
    cout << "     -o/--output-ordered   Display CPU stats in ordered, not logical, layout" << endl;
    cout << "     -t/--timestamp        Show timestamp of each stats iteration" << endl;
