@@ -21,14 +21,18 @@
                    - Added support for testing for required files.
                    - Some code cleanup.
    0.6.0   12/8/16 - Minor upgrades to file/dir tests.
+                   - Added the max speed output (does not handle exceptions)
 
 */
 #define VERSION_STRING "0.6.0"
 /*
   ToDo:
-   [ ] Not all CPUs have the max speed in the string identifier. The max speed
+   [_] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.
+   [ ] Move all stat collection into the appropriate classes. One class should
+       not collect data on the behalf of another. That was a poor design...
+       or at least it *grew into* a poor design.
    [ ] cnodes.hpp needs some documentation for the class definitions and
        members.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
