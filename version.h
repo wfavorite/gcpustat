@@ -20,9 +20,10 @@
                    - Fixed bug/omission of "most" and "full" stats mode.
                    - Added support for testing for required files.
                    - Some code cleanup.
+   0.6.0   12/8/16 - Minor upgrades to file/dir tests.
 
 */
-#define VERSION_STRING "0.5.0"
+#define VERSION_STRING "0.6.0"
 /*
   ToDo:
    [ ] Not all CPUs have the max speed in the string identifier. The max speed

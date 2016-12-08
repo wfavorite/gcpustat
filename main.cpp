@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
    Options o(argc, argv);
 
    /* Check for required files. FWIW: Does not fall out of scope here. */
-   ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts"});
+   ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts", "/sys/devices/system/cpu/cpu0/cache/"});
    if ( rf.DumpMissingFiles() )
       return(1);
    

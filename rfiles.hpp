@@ -13,8 +13,12 @@ using namespace std;
 
    What else?
    - Files with a trailing / should be tested as directories. They currently
-     are not.
+     are not. They are (now) labeled as such, but still tested with access()
+     and not stat(). This will likely be fixed when it is actually required.
 */
+const int PATH_IS_ERROR = -1;
+const int PATH_IS_FILE  =  0;
+const int PATH_IS_DIR   =  1;
 
 class ReqFiles
 {
@@ -24,6 +28,7 @@ public:
    int DumpMissingFiles(void);
    
 private:
+   int path_is_a(string path);
    bool all_good;
    vector <string> missing_files;
 };
