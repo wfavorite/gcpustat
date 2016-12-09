@@ -14,21 +14,41 @@ class SpeedInfo
 {
 public:
    SpeedInfo(unsigned int lcore);
+   
    static bool CanGather(unsigned int lcore);
    int DumpLine(void);
-   float GetMaxHardMHz(void) { if ( is_valid ) { return(hard_max_mhz); }; return(0); }
-
+   int GetCurrentStat(void);
+   string CurrentAsString(void) { return(scurrent_mhz); };
+   float CurrentAsPct(void) { return((fcurrent_mhz / fhardmax) * 100); }
+   
 private:
-   bool is_valid;
-   unsigned int cpu;
+   int get_from_proc(void);
+   int get_from_sys(void);
+   
+   /* The new */
+   bool use_sysfs; /* Use /sys if true, otherwise use /proc */
+   unsigned int this_cpu;
+
+   string scurrent_mhz;
+   float fcurrent_mhz;
+   float fhardmax;
+   
    unsigned long hard_max_mhz;
    unsigned long soft_max_mhz;
-   
-   string scaling_driver;
-   string scaling_governor;
    string cpuinfo_max_freq; /* Hz */
    string scaling_max_freq; /* Hz */
-   //string scaling_cur_freq;
+   string scaling_driver;
+   string scaling_governor;
+
+   /* is_valid is part of the old design. I am keeping it in for a couple
+      of reasons.
+      1. It is all over the place.
+      2. It *might* be of future value.
+      On the contrary, I would hope that we just pass 'UNK' values when
+      something cannot be parsed correctly - so the user understands that
+      something is different.
+   */
+   bool is_valid;
 };
 
 /* ========================================================================= */
@@ -76,13 +96,16 @@ public:
 
    int GatherSpeedInfo(void);
    int DumpSpeedInfo(void);
-   
+
+   int GatherCurrentSpeed(void) { return(speed->GetCurrentStat()); }
+
+   string CurrentMHz(void);
+   float CurrentPctOfMaxMhz(void);
+
+   /* New */
    int processor;
-   string cpu_mhz;
-   SpeedInfo *speeds;
-   /* Used to calc pct of max */
-   float max_speed;
-   float cur_speed;
+   SpeedInfo *speed;
+   string backup_mhz;   /* What someone else told us about speed. */
 
    rstat_t this_user;
    rstat_t this_nice;

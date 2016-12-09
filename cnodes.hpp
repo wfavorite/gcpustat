@@ -60,6 +60,7 @@ public:
    int ScatterCPUStat(void);
 
    int GatherInterrupts(void);
+   int GatherCPUSpeeds(void);
    
    map < int, CSocket * > sockets;
 

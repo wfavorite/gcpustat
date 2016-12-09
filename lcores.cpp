@@ -14,21 +14,128 @@ LCCache::LCCache(string &nlevel, string &ntype, string &nsize)
    size = nsize;
 }
 
+/* ========================================================================= */
+int SpeedInfo::get_from_proc(void)
+{
+   ifstream cpuinfo("/proc/cpuinfo");
+   string line;
+   size_t i;
+   int was_set_rv = 1;
+   unsigned int processor;
+   
+   if ( cpuinfo.is_open() )
+   {
+      while(getline(cpuinfo, line))
+      {
+         if ( 0 == line.find("processor") )
+         {
+            i = line.find(':');
+               
+            i++; /* Move off the ':' char */
+               
+            while ( line[i] == ' ' )
+               i++;
+               
+            processor = stoi(line.substr(i));
+         }
+
+         /* If we are on the wrong CPU, then skip parsing this line */
+         if ( processor != this_cpu )
+            continue;
+         
+         if ( 0 == line.find("cpu MHz") )
+         {
+            i = line.find(':');
+               
+            i++; /* Move off the ':' char */
+               
+            while ( line[i] == ' ' )
+               i++;
+
+            scurrent_mhz = line.substr(i);
+
+            /* Convert - regardless */
+            fcurrent_mhz = atol(scurrent_mhz.c_str());
+
+            was_set_rv = 0;
+         }
+
+      } /* while(getline()) */
+
+      cpuinfo.close();
+   } /* if ( cpuinfo.is_open() */
+
+   return(was_set_rv);
+}
+
+/* ========================================================================= */
+int SpeedInfo::get_from_sys(void)
+{
+   string smf_fname = "/sys/devices/system/cpu/cpu" + to_string(this_cpu) + "/cpufreq/scaling_cur_freq";
+   string line;
+   size_t len;
+   size_t i;
+   int was_set_rv = 1;
+   
+   ifstream smf_file(smf_fname.c_str());
+   if ( smf_file.is_open() )
+   {
+      if ( ! getline(smf_file, line) )
+      {
+         return(was_set_rv);
+      }
+
+      /* Chop the last three digits (convert from Hz to MHz) */
+      len = line.size();
+      if ( len > 3 )
+         scurrent_mhz = line.erase(len - 3);
+      else
+         scurrent_mhz = line;
+      
+      i = 0;
+      fcurrent_mhz = 0;
+      while ( i < len )
+      {
+         fcurrent_mhz *= 10;
+         fcurrent_mhz += (line[i] - '0');
+         i++;
+      }
+      
+      /* Convert from Hz to MHz */
+      fcurrent_mhz /= 1000;
+      
+      smf_file.close();
+
+      was_set_rv = 0;
+   }
+
+   return(was_set_rv);
+}
+
+
+/* ========================================================================= */
 SpeedInfo::SpeedInfo(unsigned int lcore)
 {
    size_t len;
    size_t i;
 
-   cpu = lcore;
+   this_cpu = lcore;
    is_valid = true; /* Assume true to start */
+   use_sysfs = true;
+   fhardmax = 1000; /* Anything that is not 0! */
+
    
-   /* Check (again) before trying to collect data */
+   /* Check before trying to collect data */
    if ( ! CanGather(lcore) )
    {
       is_valid = false;
+      use_sysfs = false;
+
+      get_from_proc();
       return;
    }
 
+   /* Now - gather from /sys */
    string basepath = "/sys/devices/system/cpu/cpu" + to_string(lcore) + "/cpufreq";
 
    /* Find the current driver */
@@ -110,13 +217,20 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
 
       /* Convert from Hz to MHz */
       hard_max_mhz /= 1000;
+      fhardmax = hard_max_mhz; /* This is used for maths later */
 
       cmax_freq_file.close();
    }
 
+   /* Grab the *current* speed */
+   get_from_sys();
 }
 
 /* ========================================================================= */
+/* This function was originally created (as a static function) to check to
+   see if it was appropriate to instantiate the class. When all data
+   collection regardless of source was moved into the class, this became
+   a moot point. */
 bool SpeedInfo::CanGather(unsigned int lcore)
 {
    string basepath = "/sys/devices/system/cpu/cpu" + to_string(lcore) + "/cpufreq"; 
@@ -130,6 +244,17 @@ bool SpeedInfo::CanGather(unsigned int lcore)
    return(true);
 }
 
+
+/* ========================================================================= */
+int SpeedInfo::GetCurrentStat(void)
+{
+   if ( use_sysfs )
+      return(get_from_sys());
+   else
+      return(get_from_proc());
+}
+
+/* ========================================================================= */
 int SpeedInfo::DumpLine(void)
 {
    if ( ! is_valid )
@@ -148,9 +273,8 @@ LCore::LCore(int lid, string &mhz)
 
    /* Lay in the initializing ("local") values */
    processor = lid;
-   cpu_mhz = mhz;
-   max_speed = atol(cpu_mhz.c_str());
-   speeds = nullptr;
+   speed = nullptr;
+   backup_mhz = mhz;
 
    /* Initialize all the last values - Just being pedantic. */
    last_user = 0;
@@ -165,7 +289,24 @@ LCore::LCore(int lid, string &mhz)
    last_guest_nice = 0;
    last_interrupts = 0;
 
+   /* Two different approaches are made to collect per-(logical-)core
+      information. One is telling the sub-class what those values are
+      (Which is basically why the LCCache is a struct) and to rely 
+      upon the sub-class to collect the data on your behalf (which is
+      why SpeedInfo is a class). Each has problems and we cannot be
+      design purists here because some data comes in a single read of
+      a file, and others may come in different ways (individual files).
+      Neither option is really the best - one of the reasons [frankly]
+      I like writing this in C. Because I will do a single read() of
+      the file, and parse it out from a buffer into structs as I see
+      fit. Of course, this can be done in C++, but then you are breaking
+      all kinds of rules (!RAII, C-strings, pointers, etc...) that C++
+      purists complain about. The good news is that the load here is
+      not significant, and the usage of such items is really only in
+      edge cases, and in the cache info collection - only once at
+      startup. */
    
+   /* Cache info is generated in LCore and placed into the LCCache struct */
    string cpudn = "/sys/devices/system/cpu/cpu" + to_string(lid) + "/cache/index";
    
    /* Moving these local - they are only used here. This is a
@@ -245,17 +386,20 @@ LCore::LCore(int lid, string &mhz)
       cache_index++;
    }
 
-   GatherSpeedInfo();
-   /* STUB: Broken */
-   max_speed = speeds->GetMaxHardMHz();
+   /* Collect speed info (in the SpeedInfo constructor) */
+   speed = new SpeedInfo(processor);
 }
 
 /* ========================================================================= */
 LCore::~LCore(void)
 {
-   /* SpeedInfo is only conditionally created. */
-   if ( nullptr != speeds )
-      delete speeds;
+   /* SpeedInfo may be conditionally created. */
+   if ( nullptr != speed )
+      delete speed;
+
+   /* Also of note: We really don't care about cleanup in this class. This
+      class exists for the life of the process. Cleaning up as we fall out
+      of scope is just about pointless. */
 }
 
 /* ========================================================================= */
@@ -370,30 +514,28 @@ int LCore::DumpCacheLevels(void)
 }
 
 /* ========================================================================= */
-int LCore::GatherSpeedInfo(void)
+int LCore::DumpSpeedInfo(void)
 {
-   
-   if ( SpeedInfo::CanGather(processor) )
-   {
-      speeds = new SpeedInfo(processor);
-      return(0);
-   }
-   
-   return(1);
+   if ( nullptr != speed )
+      speed->DumpLine();
+
+   return(0);
 }
 
 /* ========================================================================= */
-int LCore::DumpSpeedInfo(void)
+string LCore::CurrentMHz(void)
 {
-   if ( nullptr != speeds )
-   {
-      if ( speeds->DumpLine() )
-         cout << cpu_mhz.erase(cpu_mhz.find('.')) << " MHz\n";
-   }
-   else
-   {
-      cout << cpu_mhz.erase(cpu_mhz.find('.')) << " MHz\n";
-   }
+   if ( speed )
+      return(speed->CurrentAsString());
 
-   return(0);
+   return(backup_mhz);
+}
+
+/* ========================================================================= */
+float LCore::CurrentPctOfMaxMhz(void)
+{
+   if ( speed )
+      return(speed->CurrentAsPct());
+
+   return(100); /* No power control - must be/assume 100% */
 }

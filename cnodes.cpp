@@ -311,10 +311,7 @@ void Nodes::PrintLayout(int level)
             if ( level == PRINT_LEVEL_FULL )
             {
                cout << "   ";
-               /* STUB: Old
-                  cout << p->cpu_mhz.erase(p->cpu_mhz.find('.')) << " MHz\n";
-               */
-               p->DumpSpeedInfo();
+               p->DumpSpeedInfo(); /* Will include a LF (Cache will be on different lines) */
 
                /* This is not conditional at this time. Detailed == cache. */
                p->DumpCacheLevels();
@@ -568,9 +565,23 @@ int Nodes::GatherCPUStat(void)
 
       procstat.close();
    } /* if ( procstat.is_open() ) */
+
+
+
+
    
    /* Collect data for the (current) CPU speed */
    if (( column_display & COL_FLG_SPEED ) || ( column_display & COL_FLG_PCTSP ))
+      GatherCPUSpeeds();
+
+#ifdef COLLECT_LOCALLY
+   /* I am saving this code because it *might* be advantageous to collect stats
+      in one read of the file. As it stands, with the speed governor driver the
+      stats can be read in short individual reads. In the worst case scenario,
+      this code is repeated for EACH CPU! At this time, I am leaving this out
+      based on the design concept of pushing the logic into the class responsible
+      for the data. The problem is that this design does not match the Linux
+      interface in all cases. */
    {
       ifstream cpuinfo("/proc/cpuinfo");
       int processor;
@@ -605,7 +616,7 @@ int Nodes::GatherCPUStat(void)
 
                /* Convert - regardless */
                unsigned long cur_speed = atol(olist[processor]->cpu_mhz.c_str());
-               /* STUB: Fix ALL of this noize */
+               /* Note that cur_speed is no longer a valid class member. */
                olist[processor]->cur_speed = cur_speed;
                
             }
@@ -615,6 +626,7 @@ int Nodes::GatherCPUStat(void)
          cpuinfo.close();
       } /* if ( cpuinfo.is_open() */
    }  /* if ( COL_FLG_SPEED ) */
+#endif
 
    /* Collect interrupt data */
    if ( column_display & COL_FLG_IRQ )
@@ -777,13 +789,13 @@ int Nodes::ScatterCPUStat(void)
 
       /* Conditional items */
       if ( column_display & COL_FLG_SPEED )
-         cout << "  " << setw(4) << lc->cpu_mhz.erase(lc->cpu_mhz.find('.'));
+         cout << "  " << setw(4) << lc->CurrentMHz();
 
       if ( column_display & COL_FLG_PCTSP )
-         cout << "  " << setw(3) << ((lc->cur_speed / lc->max_speed ) * 100 ) << "%";
-      
+         cout << "  " << setw(3) << lc->CurrentPctOfMaxMhz() << "%";
+
       if ( column_display & COL_FLG_IRQ )
-      cout << "  " << setw(7) << (lc->this_interrupts - lc->last_interrupts);
+         cout << "  " << setw(7) << (lc->this_interrupts - lc->last_interrupts);
       
       cout.unsetf(ios::fixed);
       cout << flush; /* See note above on fflush() */
@@ -886,4 +898,15 @@ int Nodes::GatherInterrupts(void)
    }
 
    return(0);
+}
+
+/* ========================================================================= */
+int Nodes::GatherCPUSpeeds(void)
+{
+   int rv = 0;
+   
+   for ( auto vi : olist )
+      rv += vi->GatherCurrentSpeed();
+
+   return(rv);
 }
