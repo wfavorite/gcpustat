@@ -22,27 +22,30 @@
                    - Some code cleanup.
    0.6.0   12/8/16 - Minor upgrades to file/dir tests.
                    - Added the max speed output (does not handle exceptions)
-
+   0.7.0  12/12/16 - Port to Raspberry Pi (no cache or cpu speed info).
+                   - Resulting clean-up in lcore handing of results.
 */
-#define VERSION_STRING "0.6.0"
+#define VERSION_STRING "0.7.0"
 /*
   ToDo:
-   [_] Not all CPUs have the max speed in the string identifier. The max speed
-       should be parsed during initialization and printed in the -d mode, and
-       perhaps be used (optionally) as a % of max in the output.
-   [ ] Move all stat collection into the appropriate classes. One class should
-       not collect data on the behalf of another. That was a poor design...
-       or at least it *grew into* a poor design.
    [ ] cnodes.hpp needs some documentation for the class definitions and
        members.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
    [ ] Validate socket parsing on a multi-socket system.
+
+  ToDo (options parsing library):
    [ ] Insure that we cannot be IS_POS_ARG and HAS_xD_ARG at the same time.
    [_] Add support for ALLOW_MULT.
    [ ] Normalize all the structure names to socket, core, logical (except
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] Not all CPUs have the max speed in the string identifier. The max speed
+       should be parsed during initialization and printed in the -d mode, and
+       perhaps be used (optionally) as a % of max in the output.
+   [X] Move all stat collection into the appropriate classes. One class should
+       not collect data on the behalf of another. That was a poor design...
+       or at least it *grew into* a poor design.
    [X] Probe for required files on startup and report if something is amiss.
    [X] The spacing between "SOCKET" and the socket number in -d mode is wrong.
    [X] The GuestNice value goes extremely negative in -f(ull stats) mode.

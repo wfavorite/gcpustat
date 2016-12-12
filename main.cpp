@@ -18,10 +18,13 @@ int main(int argc, char *argv[])
    Options o(argc, argv);
 
    /* Check for required files. FWIW: Does not fall out of scope here. */
-   ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts", "/sys/devices/system/cpu/cpu0/cache/"});
+   ReqFiles rf({"/proc/cpuinfo", "/proc/stat", "/proc/interrupts"});
+   /* "/sys/devices/system/cpu/cpu0/cache/" <---- "Required" (for cache
+      info) but we work around if it does not exist. */
+   
    if ( rf.DumpMissingFiles() )
       return(1);
-   
+
    /* Parse out all the CPU nodes */
    Nodes n(o);
 
@@ -44,7 +47,7 @@ int main(int argc, char *argv[])
    /* We are going to display, so gather a set of stats now (so our first
       iteration will not be nonsensical). */
    n.GatherCPUStat();
-   
+
    /* The "normal" usage scenario. */
    itcnt = 0;
    iterations = o.iterations; /* Move local ( and to signed val) */

@@ -12,7 +12,7 @@ Nodes::Nodes(Options &o)
    string fvalue; /* Found value */
 
    int processor;
-   int physical_id;
+   int physical_id = 0;
    int core_id;
    string model_name;
    string cpu_mhz;
@@ -47,6 +47,12 @@ Nodes::Nodes(Options &o)
 
             fvalue = line.substr(i);
             processor = stoi(fvalue);
+
+            /* Set defaults for other values */
+            model_name = "Unknown";
+            cpu_mhz = "1000"; /* Make up a number */
+            core_id = processor;
+            
          }
 
          if ( 0 == line.find("physical id") )
@@ -392,7 +398,7 @@ int Nodes::GatherCPUStat(void)
    rstat_t bogus; /* This is to insure that we can('t) walk off the end
                      of the string, and to check if a new item has been
                      added. */
-   
+
    ifstream procstat("/proc/stat");
    if ( procstat.is_open() )
    {
@@ -547,6 +553,8 @@ int Nodes::GatherCPUStat(void)
                cerr << "  guest_nice = " << guest_nice << "\n";
                cerr << "  bogus = " << bogus << "\n";
 #endif
+
+               
                olist[cpunum]->InsertNewRead(user,
                                             nice,
                                             system,
@@ -557,6 +565,7 @@ int Nodes::GatherCPUStat(void)
                                             steal,
                                             guest,
                                             guest_nice);
+
             }
             
          } 

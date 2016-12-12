@@ -15,105 +15,6 @@ LCCache::LCCache(string &nlevel, string &ntype, string &nsize)
 }
 
 /* ========================================================================= */
-int SpeedInfo::get_from_proc(void)
-{
-   ifstream cpuinfo("/proc/cpuinfo");
-   string line;
-   size_t i;
-   int was_set_rv = 1;
-   unsigned int processor;
-   
-   if ( cpuinfo.is_open() )
-   {
-      while(getline(cpuinfo, line))
-      {
-         if ( 0 == line.find("processor") )
-         {
-            i = line.find(':');
-               
-            i++; /* Move off the ':' char */
-               
-            while ( line[i] == ' ' )
-               i++;
-               
-            processor = stoi(line.substr(i));
-         }
-
-         /* If we are on the wrong CPU, then skip parsing this line */
-         if ( processor != this_cpu )
-            continue;
-         
-         if ( 0 == line.find("cpu MHz") )
-         {
-            i = line.find(':');
-               
-            i++; /* Move off the ':' char */
-               
-            while ( line[i] == ' ' )
-               i++;
-
-            scurrent_mhz = line.substr(i);
-
-            /* Convert - regardless */
-            fcurrent_mhz = atol(scurrent_mhz.c_str());
-
-            was_set_rv = 0;
-         }
-
-      } /* while(getline()) */
-
-      cpuinfo.close();
-   } /* if ( cpuinfo.is_open() */
-
-   return(was_set_rv);
-}
-
-/* ========================================================================= */
-int SpeedInfo::get_from_sys(void)
-{
-   string smf_fname = "/sys/devices/system/cpu/cpu" + to_string(this_cpu) + "/cpufreq/scaling_cur_freq";
-   string line;
-   size_t len;
-   size_t i;
-   int was_set_rv = 1;
-   
-   ifstream smf_file(smf_fname.c_str());
-   if ( smf_file.is_open() )
-   {
-      if ( ! getline(smf_file, line) )
-      {
-         return(was_set_rv);
-      }
-
-      /* Chop the last three digits (convert from Hz to MHz) */
-      len = line.size();
-      if ( len > 3 )
-         scurrent_mhz = line.erase(len - 3);
-      else
-         scurrent_mhz = line;
-      
-      i = 0;
-      fcurrent_mhz = 0;
-      while ( i < len )
-      {
-         fcurrent_mhz *= 10;
-         fcurrent_mhz += (line[i] - '0');
-         i++;
-      }
-      
-      /* Convert from Hz to MHz */
-      fcurrent_mhz /= 1000;
-      
-      smf_file.close();
-
-      was_set_rv = 0;
-   }
-
-   return(was_set_rv);
-}
-
-
-/* ========================================================================= */
 SpeedInfo::SpeedInfo(unsigned int lcore)
 {
    size_t len;
@@ -123,6 +24,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    is_valid = true; /* Assume true to start */
    use_sysfs = true;
    fhardmax = 1000; /* Anything that is not 0! */
+   scurrent_mhz = "UNK";
 
    
    /* Check before trying to collect data */
@@ -227,6 +129,104 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
 }
 
 /* ========================================================================= */
+int SpeedInfo::get_from_proc(void)
+{
+   ifstream cpuinfo("/proc/cpuinfo");
+   string line;
+   size_t i;
+   int was_set_rv = 1;
+   unsigned int processor;
+   
+   if ( cpuinfo.is_open() )
+   {
+      while(getline(cpuinfo, line))
+      {
+         if ( 0 == line.find("processor") )
+         {
+            i = line.find(':');
+               
+            i++; /* Move off the ':' char */
+               
+            while ( line[i] == ' ' )
+               i++;
+               
+            processor = stoi(line.substr(i));
+         }
+
+         /* If we are on the wrong CPU, then skip parsing this line */
+         if ( processor != this_cpu )
+            continue;
+         
+         if ( 0 == line.find("cpu MHz") )
+         {
+            i = line.find(':');
+               
+            i++; /* Move off the ':' char */
+               
+            while ( line[i] == ' ' )
+               i++;
+
+            scurrent_mhz = line.substr(i);
+
+            /* Convert - regardless */
+            fcurrent_mhz = atol(scurrent_mhz.c_str());
+
+            was_set_rv = 0;
+         }
+
+      } /* while(getline()) */
+
+      cpuinfo.close();
+   } /* if ( cpuinfo.is_open() */
+
+   return(was_set_rv);
+}
+
+/* ========================================================================= */
+int SpeedInfo::get_from_sys(void)
+{
+   string smf_fname = "/sys/devices/system/cpu/cpu" + to_string(this_cpu) + "/cpufreq/scaling_cur_freq";
+   string line;
+   size_t len;
+   size_t i;
+   int was_set_rv = 1;
+   
+   ifstream smf_file(smf_fname.c_str());
+   if ( smf_file.is_open() )
+   {
+      if ( ! getline(smf_file, line) )
+      {
+         return(was_set_rv);
+      }
+
+      /* Chop the last three digits (convert from Hz to MHz) */
+      len = line.size();
+      if ( len > 3 )
+         scurrent_mhz = line.erase(len - 3);
+      else
+         scurrent_mhz = line;
+      
+      i = 0;
+      fcurrent_mhz = 0;
+      while ( i < len )
+      {
+         fcurrent_mhz *= 10;
+         fcurrent_mhz += (line[i] - '0');
+         i++;
+      }
+      
+      /* Convert from Hz to MHz */
+      fcurrent_mhz /= 1000;
+      
+      smf_file.close();
+
+      was_set_rv = 0;
+   }
+
+   return(was_set_rv);
+}
+
+/* ========================================================================= */
 /* This function was originally created (as a static function) to check to
    see if it was appropriate to instantiate the class. When all data
    collection regardless of source was moved into the class, this became
@@ -258,12 +258,25 @@ int SpeedInfo::GetCurrentStat(void)
 int SpeedInfo::DumpLine(void)
 {
    if ( ! is_valid )
+   {
+      cout << "\n";
       return(1);
+   }
 
    cout << "driver=" << scaling_driver << "; governor=" << scaling_governor << ";";
    cout << " hard=" << hard_max_mhz << "; soft=" << soft_max_mhz << "\n";
 
    return(0);
+}
+
+/* ========================================================================= */
+float SpeedInfo::CurrentAsPct(void)
+{
+   if ( is_valid )
+      return((fcurrent_mhz / fhardmax) * 100);
+
+   /* We don't know. So say it is 100% */
+   return(100);
 }
 
 /* ========================================================================= */
@@ -307,8 +320,8 @@ LCore::LCore(int lid, string &mhz)
       startup. */
    
    /* Cache info is generated in LCore and placed into the LCCache struct */
-   string cpudn = "/sys/devices/system/cpu/cpu" + to_string(lid) + "/cache/index";
-   
+   string cpudn = "/sys/devices/system/cpu/cpu" + to_string(lid) + "/cache";
+
    /* Moving these local - they are only used here. This is a
       characteristically un-C way of doing this. The point is to put var
       declarations next to where they are used, not at the top of a larger
@@ -316,9 +329,15 @@ LCore::LCore(int lid, string &mhz)
       misleading for someone who may try to read my code. */
    int cache_index = 0;
    bool try_next_index = true;
+
+   /* Don't bother if this is some odd platform (or the dir structure does
+      not exist. */
+   if ( 0 != access(cpudn.c_str(), F_OK | R_OK) )
+      try_next_index = false;
+
    while ( try_next_index )
    {
-      string index_dir_name = cpudn + to_string(cache_index) + "/";
+      string index_dir_name = cpudn + "/index" + to_string(cache_index) + "/";
       string index_file_name = index_dir_name + "level";
 
       string level_string;
@@ -414,7 +433,6 @@ int LCore::InsertNewRead(rstat_t user,
                          rstat_t guest,
                          rstat_t guest_nice)
 {
-   
    last_user = this_user;
    last_nice = this_nice;
    last_system = this_system;
@@ -448,7 +466,7 @@ int LCore::InsertNewRead(rstat_t user,
       (this_guest - last_guest) +
       (this_guest_nice - last_guest_nice);
 
-return(0);
+   return(0);
 }
 
 /* ========================================================================= */
@@ -503,7 +521,7 @@ int LCore::GetLastRead(float &user,
 int LCore::DumpCacheLevels(void)
 {
    int cnt = 0;
-   
+
    for (auto vi : clevels )
    {
       cerr << "      CACHE level=" << vi.level << "; type=" << vi.type << "; size=" << vi.size << ";\n";
@@ -539,3 +557,4 @@ float LCore::CurrentPctOfMaxMhz(void)
 
    return(100); /* No power control - must be/assume 100% */
 }
+   

@@ -19,7 +19,7 @@ public:
    int DumpLine(void);
    int GetCurrentStat(void);
    string CurrentAsString(void) { return(scurrent_mhz); };
-   float CurrentAsPct(void) { return((fcurrent_mhz / fhardmax) * 100); }
+   float CurrentAsPct(void);
    
 private:
    int get_from_proc(void);
@@ -39,15 +39,6 @@ private:
    string scaling_max_freq; /* Hz */
    string scaling_driver;
    string scaling_governor;
-
-   /* is_valid is part of the old design. I am keeping it in for a couple
-      of reasons.
-      1. It is all over the place.
-      2. It *might* be of future value.
-      On the contrary, I would hope that we just pass 'UNK' values when
-      something cannot be parsed correctly - so the user understands that
-      something is different.
-   */
    bool is_valid;
 };
 
@@ -102,10 +93,10 @@ public:
    string CurrentMHz(void);
    float CurrentPctOfMaxMhz(void);
 
-   /* New */
    int processor;
    SpeedInfo *speed;
-   string backup_mhz;   /* What someone else told us about speed. */
+   string backup_mhz;   /* What someone else (/proc/cpuinfo) told us about 
+                           speed. */
 
    rstat_t this_user;
    rstat_t this_nice;
