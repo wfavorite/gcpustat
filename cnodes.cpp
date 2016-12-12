@@ -49,8 +49,8 @@ Nodes::Nodes(Options &o)
             processor = stoi(fvalue);
 
             /* Set defaults for other values */
-            model_name = "Unknown";
-            cpu_mhz = "1000"; /* Make up a number */
+            model_name = "???";
+            cpu_mhz = "???";
             core_id = processor;
             
          }

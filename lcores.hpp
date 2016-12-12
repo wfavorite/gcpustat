@@ -16,9 +16,11 @@ public:
    SpeedInfo(unsigned int lcore);
    
    static bool CanGather(unsigned int lcore);
+   static string SafeDotChomp(string &dotstr);
+   
    int DumpLine(void);
    int GetCurrentStat(void);
-   string CurrentAsString(void) { return(scurrent_mhz); };
+   string CurrentAsString(void) { return(SafeDotChomp(scurrent_mhz)); };
    float CurrentAsPct(void);
    
 private:

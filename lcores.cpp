@@ -24,7 +24,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    is_valid = true; /* Assume true to start */
    use_sysfs = true;
    fhardmax = 1000; /* Anything that is not 0! */
-   scurrent_mhz = "UNK";
+   scurrent_mhz = "???";
 
    
    /* Check before trying to collect data */
@@ -47,7 +47,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    {
       if ( ! getline(driver_file, scaling_driver) )
       {
-         scaling_driver = "UNK";
+         scaling_driver = "???";
          is_valid = false;
          return;
       }
@@ -60,7 +60,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    {
       if ( ! getline(governor_file, scaling_governor) )
       {
-         scaling_governor = "UNK";
+         scaling_governor = "???";
          is_valid = false;
          return;
       }
@@ -74,7 +74,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    {
       if ( ! getline(smax_freq_file, scaling_max_freq) )
       {
-         scaling_max_freq = "UNK";
+         scaling_max_freq = "???";
          is_valid = false;
          return;
       }
@@ -102,7 +102,7 @@ SpeedInfo::SpeedInfo(unsigned int lcore)
    {
       if ( ! getline(cmax_freq_file, cpuinfo_max_freq) )
       {
-         cpuinfo_max_freq = "UNK";
+         cpuinfo_max_freq = "???";
          is_valid = false;
          return;
       }
@@ -259,7 +259,7 @@ int SpeedInfo::DumpLine(void)
 {
    if ( ! is_valid )
    {
-      cout << "\n";
+      /* cout << "\n"; ---- Let the calling function work this out */
       return(1);
    }
 
@@ -280,6 +280,17 @@ float SpeedInfo::CurrentAsPct(void)
 }
 
 /* ========================================================================= */
+string SpeedInfo::SafeDotChomp(string &dotstr)
+{
+   size_t found_at;
+
+   if ( string::npos != ( found_at = dotstr.find('.') ) )
+      return(dotstr.erase(found_at));
+   
+   return(dotstr);
+}
+
+/* ========================================================================= */
 LCore::LCore(int lid, string &mhz)
 {
    string line;
@@ -287,7 +298,7 @@ LCore::LCore(int lid, string &mhz)
    /* Lay in the initializing ("local") values */
    processor = lid;
    speed = nullptr;
-   backup_mhz = mhz;
+   backup_mhz = SpeedInfo::SafeDotChomp(mhz);
 
    /* Initialize all the last values - Just being pedantic. */
    last_user = 0;
@@ -534,9 +545,19 @@ int LCore::DumpCacheLevels(void)
 /* ========================================================================= */
 int LCore::DumpSpeedInfo(void)
 {
+   bool use_backup = false;
+   
    if ( nullptr != speed )
-      speed->DumpLine();
+   {
+      if ( speed->DumpLine() )
+         use_backup = true;
+   }
+   else
+      use_backup = true;
 
+   if ( use_backup )
+      cout << backup_mhz << " MHz\n";
+   
    return(0);
 }
 
@@ -546,7 +567,7 @@ string LCore::CurrentMHz(void)
    if ( speed )
       return(speed->CurrentAsString());
 
-   return(backup_mhz);
+   return(backup_mhz); /* This has already been 'dot-chomped' */
 }
 
 /* ========================================================================= */
