@@ -264,7 +264,7 @@ int SpeedInfo::DumpLine(void)
    }
 
    cout << "driver=" << scaling_driver << "; governor=" << scaling_governor << ";";
-   cout << " hard=" << hard_max_mhz << "; soft=" << soft_max_mhz << "\n";
+   cout << " hard=" << hard_max_mhz << "; soft=" << soft_max_mhz << endl;
 
    return(0);
 }
@@ -535,7 +535,7 @@ int LCore::DumpCacheLevels(void)
 
    for (auto vi : clevels )
    {
-      cerr << "      CACHE level=" << vi.level << "; type=" << vi.type << "; size=" << vi.size << ";\n";
+      cerr << "      CACHE level=" << vi.level << "; type=" << vi.type << "; size=" << vi.size << ";" << endl;
       cnt++;
    }
 
@@ -556,7 +556,7 @@ int LCore::DumpSpeedInfo(void)
       use_backup = true;
 
    if ( use_backup )
-      cout << backup_mhz << " MHz\n";
+      cout << backup_mhz << " MHz" << endl;
    
    return(0);
 }

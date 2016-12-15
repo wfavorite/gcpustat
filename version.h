@@ -24,8 +24,14 @@
                    - Added the max speed output (does not handle exceptions)
    0.7.0  12/12/16 - Port to Raspberry Pi (no cache or cpu speed info).
                    - Resulting clean-up in lcore handing of results.
+   0.7.1  12/15/16 - Converted some output back to explicit endl (flush) EOL
+                     handling because of mangled output in docker containers.
+                     (Correct fix is to run the container with -t (allocate
+                     a pseudo tty). I am keeping this change just the same.
+                     It is in the dump portion, so this is not a significant
+                     load on the system and is somewhat "cleaner".
 */
-#define VERSION_STRING "0.7.0"
+#define VERSION_STRING "0.7.1"
 /*
   ToDo:
    [ ] cnodes.hpp needs some documentation for the class definitions and

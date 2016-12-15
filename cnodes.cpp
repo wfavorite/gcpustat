@@ -266,11 +266,11 @@ int Nodes::BuildCPUList(void)
 /* ========================================================================= */
 void Nodes::PrintTopInfo(void)
 {
-   cout << "Total logical cores (threads in system): " << cpu_count << "\n";
-   cout << "Core width (threads per core): " << width << "\n";
-   cout << "Socket height (threads per socket): " << socket_height << "\n";
-   cout << "Socket height (cores per socket): " << (socket_height / width) << "\n";
-   cout << "\n";
+   cout << "Total logical cores (threads in system): " << cpu_count << endl;
+   cout << "Core width (threads per core): " << width << endl;
+   cout << "Socket height (threads per socket): " << socket_height << endl;
+   cout << "Socket height (cores per socket): " << (socket_height / width) << endl;
+   cout << endl;
 }
 
 /* ========================================================================= */
@@ -297,14 +297,14 @@ void Nodes::PrintLayout(int level)
          cout << s->model_name;
       }
 
-      cout << "\n";
+      cout << endl;
 
       core_id = 0;
       while ( core_id <= s->max_core_id )
       {
          c = s->pcores[core_id];
 
-         cout << "  CORE " << c->core_id << "\n";
+         cout << "  CORE " << c->core_id << endl;
 
          for ( vector< LCore * >::iterator li = c->lcores.begin();
                li != c->lcores.end();
@@ -323,7 +323,7 @@ void Nodes::PrintLayout(int level)
                p->DumpCacheLevels();
             }
             else
-               cout << "\n";
+               cout << endl;
          }
 
          core_id++;
@@ -350,13 +350,13 @@ int Nodes::PrintLLayout(void)
       cout << "cpu" << lc->processor;
       
       if ( 0 == l % width )
-         cout << "\n";
+         cout << endl;
       else
          cout << "   ";
 
       if (( 0 == l % socket_height ) && ( l != cpu_count ))
       {
-         cout << "\n";
+         cout << endl;
       }
 
       l++;
