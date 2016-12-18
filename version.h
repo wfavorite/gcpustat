@@ -30,14 +30,15 @@
                      a pseudo tty). I am keeping this change just the same.
                      It is in the dump portion, so this is not a significant
                      load on the system and is somewhat "cleaner".
+   0.8.0  12/18/16 - Code refactoring and documentation.
 */
-#define VERSION_STRING "0.7.1"
+#define VERSION_STRING "0.8.0"
 /*
   ToDo:
-   [ ] cnodes.hpp needs some documentation for the class definitions and
-       members.
    [ ] Vague, but true: "More items" should be parsed from /proc/cpuinfo.
-   [ ] Validate socket parsing on a multi-socket system.
+   [ ] Validate socket parsing on a multi-socket system. Specifically the
+       use of CSocket::max_core_id. I am afraid this might be a problem on
+       multiple socket systems.
 
   ToDo (options parsing library):
    [ ] Insure that we cannot be IS_POS_ARG and HAS_xD_ARG at the same time.
@@ -46,6 +47,8 @@
        where they clearly reference /proc/cpuinfo fields).
 
   Done:
+   [X] cnodes.hpp needs some documentation for the class definitions and
+       members.
    [X] Not all CPUs have the max speed in the string identifier. The max speed
        should be parsed during initialization and printed in the -d mode, and
        perhaps be used (optionally) as a % of max in the output.

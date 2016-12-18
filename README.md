@@ -53,4 +53,6 @@ SOCKET   0     Intel(R) Atom(TM) CPU D510   @ 1.66GHz
 
 The project is coded in C++ 11 with some design optimizations aimed at performance. (The tool should not *consume* the CPUs it is monitoring.) The code is free to use with BSD licensing.
 
+Testing has been done on lower-end AMD/Atom/Raspberry Pi architectures, but not multiple socket systems. (A potential problem in building the related data structures has been identified, but not validated/tested at this time.) 
+
 

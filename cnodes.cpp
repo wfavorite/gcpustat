@@ -203,9 +203,6 @@ PCore::PCore(int cid)
 {
    core_id = cid;
 
-   /* We will use this for iteration. Set to an impossible negative value. */
-   max_processor = -1;
-   
    /* Clear the vector - Being pedantic */
    lcores.clear();
 }
@@ -234,6 +231,12 @@ int Nodes::BuildCPUList(void)
       core_id = 0;
       while ( core_id <= s->max_core_id )
       {
+         /* STUB: Note that this will break on a multiple socket system.
+                  By starting at core_id=0 and directly accessing without
+                  checking to see that it exists, then a new will be 
+                  instantiated with an empty lcores list. I believe this
+                  will break in a non-noticable manner, but that remains
+                  to be tested on an actual multiple-socket system. */
          c = s->pcores[core_id];
 
          for ( vector< LCore * >::iterator li = c->lcores.begin();
